@@ -183,6 +183,8 @@ public class PGNParserColumn {
 		ArrayList<HalfMove> currentLine = new ArrayList<HalfMove>();
 		
 		for (HalfMove half : allHalfMoves) {
+			
+			System.out.println("move to add "  + half.toString());
 
 			// line completed
 			if (half.getPosition() == 0 && half.getNumber() != 1) {
@@ -191,6 +193,8 @@ public class PGNParserColumn {
 			}
 			currentLine.add(half);
 		}
+		//add last line too
+		allStructured.add(currentLine);
 		
 		return allStructured;
 	}

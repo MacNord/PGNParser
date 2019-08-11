@@ -6,7 +6,7 @@ import java.util.stream.Stream;
  */
 public class PGNFinder {
 
-	private static String folder = "/home/casanova/Documents/pgn/";
+	private static String folder = "rsc";
 
 	public static void main(String[] args) throws Exception {
 
