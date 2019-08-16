@@ -76,16 +76,16 @@ public class PGNParserColumn {
 			
 			
 			ArrayList<ArrayList<HalfMove>> allStructured = createdStrucuted(allHalfMoves);
-			
+
 			for (ArrayList<HalfMove> cur : allStructured) {
-				StringBuilder allComments = new StringBuilder();
+				StringBuilder previousCommentsOfLine = new StringBuilder();
 				for (int i = 0; i < cur.size(); i++) {
 					if (i < cur.size() - 1) {
-						allComments.append(cur.get(i).getComment());
+						previousCommentsOfLine.append(cur.get(i).getComment());
 						cur.get(i).setComment("");
 					} else {
 //						add it
-						cur.get(i).setComment(allComments.toString());
+						cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
 					}
 				}
 			}
@@ -98,12 +98,12 @@ public class PGNParserColumn {
 					if (i == 0) {
 						all.append("\n");
 						// number always here..
-						all.append(String.format("%5s", cur.get(i).getNumber() + ". "));
+						all.append(String.format("%6s", cur.get(i).getNumber() + ". "));
 					}
-					all.append(String.format("%5s", cur.get(i).getHalfMove()));
+					all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()));
 
 					if (i == cur.size() - 1) {
-						all.append(String.format("%5s", "   " + cur.get(i).getComment()));
+						all.append(String.format("%6s", "   " + cur.get(i).getComment()));
 					}
 				}
 			}
@@ -267,10 +267,13 @@ public class PGNParserColumn {
 	 */
 	private static LinkedList<HalfMove> createMoves(LinkedList<String> tokens, int moveNumber, int level) {
 		LinkedList<HalfMove> halfMoves = new LinkedList<HalfMove>();
+		
 
 		for (String token : tokens) {
 			if (token.startsWith("{")) {
 				halfMoves.getLast().setComment(token);
+			} else if (token.startsWith("+") | token.startsWith("?") | token.startsWith("!")) {
+				halfMoves.getLast().setAttribute(token);
 			} else if (token.startsWith("(")) {
 
 				String newLevel = token.replaceFirst("\\(", "");
@@ -296,7 +299,7 @@ public class PGNParserColumn {
 	}
 
 	private static LinkedList<String> tokenize(String oneLIne) {
-		String regex = "\\{.*?\\}|\\(|\\)|[BRQNK][a-h][1-8]| [a-h][1-8]|[BRQNK][a-h][a-h][1-8]|O-O|0-0-0|[BRQNK]x[a-h][1-8]|[a-h]x[a-h][1-8]|1\\/2-1\\/2|1\\/-O|O-\\/1";
+		String regex = "\\{.*?\\}|\\(|\\)|[BRQNK][a-h][1-8]| [a-h][1-8]|[BRQNK][a-h][a-h][1-8]|O-O|0-0-0|[BRQNK]x[a-h][1-8]|[a-h]x[a-h][1-8]|[\\+|\\?|\\!]?[\\+|\\?|\\!]|1\\/2-1\\/2|1\\/-O|O-\\/1";
 		Pattern pattern = Pattern.compile(regex);
 
 		Matcher matcher = pattern.matcher(oneLIne);

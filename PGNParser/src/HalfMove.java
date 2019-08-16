@@ -9,7 +9,14 @@ public class HalfMove {
 	
 	private int level;
 	
+	/**
+	 * comments after a move like + # !! ?? !? ?! ! ?
+	 */
+	private String attribute = "";
+	
 	private String comment = "";
+	
+	
 
 	public HalfMove(int number, boolean whitheOrBlack, String halfMove, int level, String comment) {
 		this.number = number;
@@ -108,6 +115,14 @@ public class HalfMove {
 	@Override
 	public String toString() {
 		return " halfMove=" + halfMove + ", level=" + level	+ " pos " + getPosition();
+	}
+
+	public String getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(String attribute) {
+		this.attribute = attribute;
 	}
 }
 
