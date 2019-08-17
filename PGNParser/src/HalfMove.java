@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public class HalfMove {
 	
@@ -71,36 +72,22 @@ public class HalfMove {
 	public String toString(HalfMove pervious) {
 
 		StringBuilder output = new StringBuilder();
-		boolean levelUp = false;
-		boolean levelDown = false;
-		boolean previousItemExists = false;
-		
-		
-		if (pervious != null) {
-			levelUp = pervious.getLevel() < this.level;
-			levelDown = pervious.getLevel() > this.level;
-		} 
-		
+
 		// line feed ?
-		if (((pervious == null) || (pervious.getNumber() != this.getNumber()) || (pervious.level != this.level))){
+		if (((pervious == null) || (pervious.getNumber() != this.getNumber()) || (pervious.level != this.level))) {
 			output.append("\n");
 			// number always here..
 			output.append(String.format("%5s", number + ". "));
-		} else {
-			previousItemExists = true;
 		}
-		
 
 		// indentation
-		
 		for (int i = 0; i < (3 * level); i++) {
 			output.append(String.format("%5s", "  "));
 		}
 
-
 		output.append(String.format("%5s", halfMove));
 
-		output.append( comment );
+		output.append(comment);
 
 		return output.toString();
 	}
@@ -123,6 +110,36 @@ public class HalfMove {
 
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
+	}
+	
+	/**
+	 * Splits comments 
+	 * @param maxLenght
+	 * @return
+	 */
+	public ArrayList<String> getStructuredComments(int maxLenght) {
+
+		String[] commentToken = this.comment.replace("{", " ").replace("}", " ").split(" ");
+
+		StringBuilder commentLine = new StringBuilder();
+		ArrayList<String> all = new ArrayList<String>();
+
+		for (int i = 0; i < commentToken.length; i++) {
+			String word = commentToken[i];
+
+			if (!word.isEmpty()) {
+				if ((commentLine.length() + word.length() + 1) > maxLenght) {
+					all.add(commentLine.toString());
+					commentLine.setLength(0);
+				}
+				commentLine.append(word);
+				commentLine.append(" ");
+			}
+		}
+		// last line
+		all.add(commentLine.toString());
+		
+		return all;
 	}
 }
 
