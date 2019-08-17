@@ -77,37 +77,50 @@ public class PGNParserColumn {
 				}
 			}
 
-			StringBuilder all = new StringBuilder();
-			for (ArrayList<HalfMove> cur : allStructured) {
-
-				for (int i = 0; i < cur.size(); i++) {
-					if (i == 0) {
-						all.append(LINE_SEPARATOR);
-						// number always here..
-						all.append(String.format("%6s", cur.get(i).getNumber() + ". "));
-					}
-					all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
-
-					// comment is always on last item of line here..
-					if (!cur.get(i).getComment().isEmpty()) {
-						ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
-						for (String commentLine : allComments) {
-							all.append(LINE_SEPARATOR);
-							all.append("                                        c:|" + commentLine);
-						}
-					}
-
-				}
-			}
-
+			StringBuilder all = printIt(allStructured);
 //			Parses PGN Files and formats them into columns for better readability
 			System.out.println(all);
+			
+			RTFPrinter printRTF = new RTFPrinter();
+			System.out.println("first size is " + allStructured.size());
+			printRTF.printRTF(allStructured);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
+	
+	/**
+	 * 
+	 * @param allStructured
+	 * @return
+	 */
+private static StringBuilder printIt(ArrayList<ArrayList<HalfMove>> allStructured) {
+	StringBuilder all = new StringBuilder();
+	for (ArrayList<HalfMove> cur : allStructured) {
+
+		for (int i = 0; i < cur.size(); i++) {
+			if (i == 0) {
+				all.append(LINE_SEPARATOR);
+				// number always here..
+				all.append(String.format("%3s", cur.get(i).getNumber() + ". "));
+			}
+			all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+
+			// comment is always on last item of line here..
+			if (!cur.get(i).getComment().isEmpty()) {
+				ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
+				for (String commentLine : allComments) {
+					all.append(LINE_SEPARATOR);
+					all.append("                                        c:|" + commentLine);
+				}
+			}
+
+		}
+	}
+	return all;
+}
 
 	/**
 	 * Double dimension plus end elements.

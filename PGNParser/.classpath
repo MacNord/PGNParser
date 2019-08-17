@@ -3,5 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="rsc"/>
+	<classpathentry kind="lib" path="/home/casanova/.m2/repository/com/tutego/jrtf/0.8-SNAPSHOT/jrtf-0.8-SNAPSHOT.jar" sourcepath="/jRTF"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
