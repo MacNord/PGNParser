@@ -24,13 +24,13 @@ import static com.tutego.jrtf.RtfUnit.*;
 
 public class RTFPrinter {
 
-	private static final int FONT_SIZE = 24;
+	private static final int FONT_SIZE = 18;
 
 	public static void main(String[] args) throws IOException {
 
 		Rtf.rtf()
 				.header(color(185, 185, 185).at(1), color(2, 0xff, 0).at(2), color(3, 0, 0xff).at(3),
-						font("Calibri").at(1))
+						font("Noto Mono").at(1))
 				.section(extracted()).out(new FileWriter("out.rtf"));
 
 //		 Rtf.rtf().p( "Hello World" ).out( new FileWriter("out.rtf") );
@@ -57,16 +57,21 @@ public class RTFPrinter {
 		return  all.toArray( new RtfTextPara[2]);
 	}
 
-	public void printRTF(ArrayList<ArrayList<HalfMove>> allStructured) throws IOException {
+	public void printRTF(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured, FileWriter fileWriter ) throws IOException {
 
-		Rtf.rtf().header(color(185, 185, 185).at(1), color(2, 0xff, 0).at(2), color(3, 0, 0xff).at(3),
-				font("Calibri").at(1)).section(getParagraphs(allStructured)).out(new FileWriter("out.rtf"));
+		Rtf.rtf().header(color(185, 0, 0).at(1), color(0, 0, 0).at(2), color(15, 128, 255).at(3),
+				font("Noto Mono").at(1)).section(getParagraphs(header, allStructured)).out(fileWriter);
 
 	}
 
-	private static RtfTextPara[] getParagraphs(ArrayList<ArrayList<HalfMove>> allStructured) {
+	private static RtfTextPara[] getParagraphs(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
 
 		ArrayList<RtfTextPara> all = new ArrayList<RtfTextPara>();
+				
+		for (String headerLine : header) {
+			all.add(p(fontSize(FONT_SIZE, font(1,headerLine))));
+		}
+	
 
 		ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
 		
@@ -78,27 +83,26 @@ public class RTFPrinter {
 					currentRTFTextLine = new ArrayList<RtfText>();
 
 					// number always here..
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%3s", cur.get(i).getNumber() + ". "))));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.get(i).getNumber() + ". "))));
 				}
 
 				String halfMove = String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute());
 				if (cur.get(i).isWhite()) {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, color(1, bold(shadow(halfMove)))));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
 				} else {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, halfMove)));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
 				}
 
 				// comment is always on last item of line here..
 				if (!cur.get(i).getComment().isEmpty()) {
-					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
+					ArrayList<String> allComments = cur.get(i).getStructuredComments(38);
 					for (String commentLine : allComments) {
 						all.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
 						currentRTFTextLine = new ArrayList<RtfText>();
 						currentRTFTextLine.add(
-								fontSize(FONT_SIZE, font(1, "                                        c:|" + commentLine)));
+								fontSize(FONT_SIZE, font(1, color(3,"                                        " + commentLine))));
 					}
 				}
-
 			}
 		}
 		System.out.println("size is " + all.size());

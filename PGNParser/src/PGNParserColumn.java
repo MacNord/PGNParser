@@ -2,6 +2,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -27,18 +28,20 @@ public class PGNParserColumn {
 			String line = "";
 
 			StringBuffer buffer = new StringBuffer();
+			
+			ArrayList<String> header = new ArrayList<String>();
 
 			while (line != null) {
 				line = buffered.readLine();
-				buffer.append(line + " ");
-//				System.out.println(line);
+				
+				if (line != null && line.startsWith("[")) {
+					header.add(line);
+				} else {
+					buffer.append(line + " ");
+				}
 			}
 
 			String oneLIne = buffer.toString().replaceAll(LINE_SEPARATOR, " ");
-//			StringBuffer oneLineB = new StringBuffer(
-//					"<!DOCTYPE html><html lang=\\\"en\\\"><head><meta charset=\\\"utf-8\\\"></head><body>");
-//
-//			oneLineB.append(oneLIne);
 
 			LinkedList<String> tokens = tokenize(oneLIne);
 
@@ -77,13 +80,13 @@ public class PGNParserColumn {
 				}
 			}
 
-			StringBuilder all = printIt(allStructured);
+			StringBuilder all = printIt(header, allStructured);
 //			Parses PGN Files and formats them into columns for better readability
 			System.out.println(all);
 			
 			RTFPrinter printRTF = new RTFPrinter();
 			System.out.println("first size is " + allStructured.size());
-			printRTF.printRTF(allStructured);
+			printRTF.printRTF(header, allStructured, new FileWriter("out.rtf"));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -96,15 +99,23 @@ public class PGNParserColumn {
 	 * @param allStructured
 	 * @return
 	 */
-private static StringBuilder printIt(ArrayList<ArrayList<HalfMove>> allStructured) {
+private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
+	
 	StringBuilder all = new StringBuilder();
+	
+	for (String headerLine : header) {
+		all.append(headerLine);
+		all.append(LINE_SEPARATOR);
+	}
+	
+
 	for (ArrayList<HalfMove> cur : allStructured) {
 
 		for (int i = 0; i < cur.size(); i++) {
 			if (i == 0) {
 				all.append(LINE_SEPARATOR);
 				// number always here..
-				all.append(String.format("%3s", cur.get(i).getNumber() + ". "));
+				all.append(String.format("%4s", cur.get(i).getNumber() + ". "));
 			}
 			all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
 
@@ -142,7 +153,7 @@ private static StringBuilder printIt(ArrayList<ArrayList<HalfMove>> allStructure
 			currentLine.add(half);
 		}
 
-		currentLine.add(new HalfMove(0, true, "end", 0, ""));
+		currentLine.add(new HalfMove(0, currentLine.size() % 2 == 0, "end", 0, "end"));
 		// add last line too
 		allStructured.add(currentLine);
 
