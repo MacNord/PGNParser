@@ -57,19 +57,17 @@ public class RTFPrinter {
 		return  all.toArray( new RtfTextPara[2]);
 	}
 
-	public void printRTF(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured, FileWriter fileWriter ) throws IOException {
+//	public CharSequence printRTF(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) throws IOException {
+//
+//
+//	}
 
-		Rtf.rtf().header(color(185, 0, 0).at(1), color(0, 0, 0).at(2), color(15, 128, 255).at(3),
-				font("Noto Mono").at(1)).section(getParagraphs(header, allStructured)).out(fileWriter);
+	public static ArrayList<RtfTextPara> getParagraphs(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
 
-	}
-
-	private static RtfTextPara[] getParagraphs(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
-
-		ArrayList<RtfTextPara> all = new ArrayList<RtfTextPara>();
+		ArrayList<RtfTextPara> oneGame = new ArrayList<RtfTextPara>();
 				
 		for (String headerLine : header) {
-			all.add(p(fontSize(FONT_SIZE, font(1,headerLine))));
+			oneGame.add(p(fontSize(FONT_SIZE, font(1,headerLine))));
 		}
 	
 
@@ -79,7 +77,7 @@ public class RTFPrinter {
 
 			for (int i = 0; i < cur.size(); i++) {
 				if (i == 0) {
-					all.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
+					oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
 					currentRTFTextLine = new ArrayList<RtfText>();
 
 					// number always here..
@@ -97,7 +95,7 @@ public class RTFPrinter {
 				if (!cur.get(i).getComment().isEmpty()) {
 					ArrayList<String> allComments = cur.get(i).getStructuredComments(38);
 					for (String commentLine : allComments) {
-						all.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
+						oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
 						currentRTFTextLine = new ArrayList<RtfText>();
 						currentRTFTextLine.add(
 								fontSize(FONT_SIZE, font(1, color(3,"                                        " + commentLine))));
@@ -105,7 +103,7 @@ public class RTFPrinter {
 				}
 			}
 		}
-		System.out.println("size is " + all.size());
+		System.out.println("size is " + oneGame.size());
 		
 //		StringBuilder all = new StringBuilder();
 //		for (ArrayList<HalfMove> cur : allStructured) {
@@ -131,7 +129,7 @@ public class RTFPrinter {
 //		}
 //		return all;
 
-		return  all.toArray( new RtfTextPara[all.size()]);
+		return  oneGame;
 	}
 
 }

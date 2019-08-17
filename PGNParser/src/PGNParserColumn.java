@@ -1,8 +1,12 @@
 
+import static com.tutego.jrtf.RtfHeader.color;
+import static com.tutego.jrtf.RtfHeader.font;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -12,6 +16,9 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.tutego.jrtf.Rtf;
+import com.tutego.jrtf.RtfTextPara;
+
 public class PGNParserColumn {
 
 //	private static final String TAB = "\t";
@@ -20,118 +27,155 @@ public class PGNParserColumn {
 //	private static final String TAB = "&emsp;";
 //	private static final String LINE_SEPARATOR = "<br/>";
 
-	public static void modify(File file) {
+	public void modify(File inPutPGNFile) {
 
-		try (InputStream fileStream = new FileInputStream(file);
-				Reader decoder = new InputStreamReader(fileStream, "UTF-8");
-				BufferedReader buffered = new BufferedReader(decoder);) {
-			String line = "";
+		try(FileWriter outPutFileWriter = new FileWriter(inPutPGNFile.getName() + ".rtf")) {
 
-			StringBuffer buffer = new StringBuffer();
-			
-			ArrayList<String> header = new ArrayList<String>();
+			try (InputStream fileStream = new FileInputStream(inPutPGNFile);
+					Reader decoder = new InputStreamReader(fileStream, "UTF-8");
+					BufferedReader buffered = new BufferedReader(decoder);) {
+				String line = "";
 
-			while (line != null) {
-				line = buffered.readLine();
-				
-				if (line != null && line.startsWith("[")) {
-					header.add(line);
-				} else {
-					buffer.append(line + " ");
-				}
-			}
+				StringBuffer pgnMoveData = new StringBuffer();
+				ArrayList<String> pgnHeaderData = new ArrayList<String>();
 
-			String oneLIne = buffer.toString().replaceAll(LINE_SEPARATOR, " ");
+				boolean newPgn = false;
 
-			LinkedList<String> tokens = tokenize(oneLIne);
+				ArrayList<RtfTextPara> allRTF = new ArrayList<RtfTextPara>();
 
-			int moveNumber = 2;
-			int level = 0;
+				while (line != null) {
+					line = buffered.readLine();
 
-			LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level);
-
-			for (int i = 0; i < allHalfMoves.size() - 1; i++) {
-
-				HalfMove currentA = allHalfMoves.get(i);
-				HalfMove nextA = allHalfMoves.get(i + 1);
-
-				LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
-
-				allHalfMoves.addAll(i + 1, toInsert);
-
-				if (currentA.isWhite() && (currentA.getPosition() + 1 != nextA.getPosition())) {
-					// no black move for this white move
-					allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
-				}
-			}
-
-			ArrayList<ArrayList<HalfMove>> allStructured = createdStrucuted(allHalfMoves);
-
-			for (ArrayList<HalfMove> cur : allStructured) {
-				StringBuilder previousCommentsOfLine = new StringBuilder();
-				for (int i = 0; i < cur.size(); i++) {
-					if (i < cur.size() - 1) {
-						previousCommentsOfLine.append(cur.get(i).getComment());
-						cur.get(i).setComment("");
+					if (line != null && line.startsWith("[")) {
+						if (!newPgn) {
+							if (!pgnHeaderData.isEmpty()) {
+								// new file process so far data
+								allRTF.addAll(processGame(pgnMoveData, pgnHeaderData));
+							}
+							// next game
+							pgnHeaderData = new ArrayList<String>();
+						}
+						pgnHeaderData.add(line);
+						newPgn = true;
 					} else {
-//						add it
-						cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
+						if (newPgn) {
+							pgnMoveData.setLength(0);
+						}
+						pgnMoveData.append(line + " ");
+						newPgn = false;
 					}
 				}
+				// process last game as well
+				allRTF.addAll(processGame(pgnMoveData, pgnHeaderData));
+
+				// print the bloody rtf :)
+				Rtf.rtf().header(color(185, 0, 0).at(1), color(0, 0, 0).at(2), color(15, 128, 255).at(3),
+						font("Noto Mono").at(1)).section(allRTF.toArray( new RtfTextPara[allRTF.size()])).out(outPutFileWriter);
+				
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
-			StringBuilder all = printIt(header, allStructured);
-//			Parses PGN Files and formats them into columns for better readability
-			System.out.println(all);
-			
-			RTFPrinter printRTF = new RTFPrinter();
-			System.out.println("first size is " + allStructured.size());
-			printRTF.printRTF(header, allStructured, new FileWriter("out.rtf"));
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 
 	}
-	
+
+	/**
+	 * 
+	 * @param outPutFileWriter
+	 * @param pgnMoveData
+	 * @param pgnHeaderData
+	 * @throws IOException
+	 */
+	private ArrayList<RtfTextPara> processGame(StringBuffer pgnMoveData, ArrayList<String> pgnHeaderData)
+			throws IOException {
+		String oneLIne = pgnMoveData.toString().replaceAll(LINE_SEPARATOR, " ");
+
+		LinkedList<String> tokens = tokenize(oneLIne);
+
+		int moveNumber = 2;
+		int level = 0;
+
+		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level);
+
+		for (int i = 0; i < allHalfMoves.size() - 1; i++) {
+
+			HalfMove currentA = allHalfMoves.get(i);
+			HalfMove nextA = allHalfMoves.get(i + 1);
+
+			LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
+
+			allHalfMoves.addAll(i + 1, toInsert);
+
+			if (currentA.isWhite() && (currentA.getPosition() + 1 != nextA.getPosition())) {
+				// no black move for this white move
+				allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
+			}
+		}
+
+		ArrayList<ArrayList<HalfMove>> allStructured = createdStrucuted(allHalfMoves);
+
+		for (ArrayList<HalfMove> cur : allStructured) {
+			StringBuilder previousCommentsOfLine = new StringBuilder();
+			for (int i = 0; i < cur.size(); i++) {
+				if (i < cur.size() - 1) {
+					previousCommentsOfLine.append(cur.get(i).getComment());
+					cur.get(i).setComment("");
+				} else {
+//						add it
+					cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
+				}
+			}
+		}
+
+		StringBuilder all = printIt(pgnHeaderData, allStructured);
+//			Parses PGN Files and formats them into columns for better readability
+		System.out.println(all);
+
+		System.out.println("first size is " + allStructured.size());
+		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
+	}
+
 	/**
 	 * 
 	 * @param allStructured
 	 * @return
 	 */
-private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
-	
-	StringBuilder all = new StringBuilder();
-	
-	for (String headerLine : header) {
-		all.append(headerLine);
-		all.append(LINE_SEPARATOR);
-	}
-	
+	private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
 
-	for (ArrayList<HalfMove> cur : allStructured) {
+		StringBuilder all = new StringBuilder();
 
-		for (int i = 0; i < cur.size(); i++) {
-			if (i == 0) {
-				all.append(LINE_SEPARATOR);
-				// number always here..
-				all.append(String.format("%4s", cur.get(i).getNumber() + ". "));
-			}
-			all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
-
-			// comment is always on last item of line here..
-			if (!cur.get(i).getComment().isEmpty()) {
-				ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
-				for (String commentLine : allComments) {
-					all.append(LINE_SEPARATOR);
-					all.append("                                        c:|" + commentLine);
-				}
-			}
-
+		for (String headerLine : header) {
+			all.append(headerLine);
+			all.append(LINE_SEPARATOR);
 		}
+
+		for (ArrayList<HalfMove> cur : allStructured) {
+
+			for (int i = 0; i < cur.size(); i++) {
+				if (i == 0) {
+					all.append(LINE_SEPARATOR);
+					// number always here..
+					all.append(String.format("%4s", cur.get(i).getNumber() + ". "));
+				}
+				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+
+				// comment is always on last item of line here..
+				if (!cur.get(i).getComment().isEmpty()) {
+					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
+					for (String commentLine : allComments) {
+						all.append(LINE_SEPARATOR);
+						all.append("                                        c:|" + commentLine);
+					}
+				}
+
+			}
+		}
+		return all;
 	}
-	return all;
-}
 
 	/**
 	 * Double dimension plus end elements.

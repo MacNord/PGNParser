@@ -14,8 +14,64 @@ slightly different position since pawn is on c7 not e7 like in last chapter so
 new plan attack b7, d5, Ne5, Rd1 and use your Bishops}) 8. d5 {cant allow black
 to play d5} 8... Ne7 9. O-O Nxd2 (9... Bxd2 10. Nxd2 Nxd2 11. Bxd2 d6 12. Re1
 O-O 13. Qh5) 10. Bxd2 Bxd2 11. d6 cxd6 12. Qxd2 O-O (12... d5 13. Bxd5 O-O 14.
-Rad1 {one pawn down but better possition}) 13. Qxd6) 4. d4 exd4 5. e5 {Rip your
+Rad1 {one pawn down but better position}) 13. Qxd6) 4. d4 exd4 5. e5 {Rip your
 opponent apart :)} 5... Ne4 (5... d5 {common} 6. Bb5 Ne4 7. Nxd4 Bd7 8. Bxc6
 bxc6 9. O-O Bc5 10. f3 Ng5 {king side pawn storm}) 6. Qe2 Nc5 (6... Bb4+ 7. Kf1
 d5 8. exd6 f5 9. Nbd2 Bxd2 10. Nxd2 Qxd6 11. Nxe4 fxe4 12. Qxe4+ Qe5 13. Qxe5+
 Nxe5 14. Bb3) 7. O-O Be7 8. c3 {gambit style} 8... dxc3 9. Nxc3 O-O 10. Rd1 *
+
+
+[Event "?"]
+[Site "?"]
+[Date "????.??.??"]
+[Round "?"]
+[White "e4"]
+[Black "Sicilian"]
+[Result "*"]
+
+1. e4 c5 2. c3 {want to play d4} 2... g6 (2... d5 3. exd5 Qxd5 4. d4 cxd4 (4...
+Nc6 5. Nf3 Bg4 6. Be2 cxd4 {if not takes we take on c5} 7. cxd4 Nf6 {not normal
+take advantage} (7... e6 {main move} 8. h3 Bh5 9. Nc3 Qa5 10. d5! exd5 11. Nd4
+Bxe2 12. Qxe2+ Be7 13. Nxc6 bxc6 14. O-O {strike when you can}) 8. Nc3 Qa5 9. h3
+Bh5 10. b4 {is this a tactic ?} 10... Qxb4 11. Bd2 Qd6 12. Rb1 Qd7 13. d5 Nxd5
+14. Nxd5 Qxd5 15. Rxb7) 5. cxd4 {what we want 29m}) (2... Nf6 3. e5 {base an
+attack based on the e pawn} 3... Nd5 4. d4 cxd4 5. Nf3 Nc6 6. cxd4 d6 7. Bc4 Nb6
+(7... e6 {what we want} 8. O-O dxe5 (8... Be7 9. exd6 Qxd6) 9. dxe5) 8. Bb5 dxe5
+9. Nxe5 Bd7 {change of plans} 10. Nxd7 Qxd7 11. Nc3 e6 12. O-O Be7 13. Qg4) 3.
+d4 cxd4 4. cxd4 *
+
+
+[Event "?"]
+[Site "?"]
+[Date "????.??.??"]
+[Round "?"]
+[White "e4"]
+[Black "French"]
+[Result "*"]
+
+1. e4 e6 2. d4 d5 3. Nd2 {Tarasch m42} 3... c5 (3... Nf6 4. Bd3 {e4 attacked:
+defend it} 4... c5 5. c3 {d4 attacked defend it} 5... cxd4 6. cxd4 dxe4 7. Nxe4
+Bd7 (7... Qxd4 8. Bb5+!) (7... Nxe4 8. Bxe4 {not good for black}) 8. Nc3 {don't
+exchange}) (3... Be7 4. Ngf3 Nf6 5. Bd3 c5 6. c3 Nc6 7. O-O dxe4 8. Nxe4 cxd4 9.
+cxd4 O-O 10. Nc3 Nb4 11. Bb1 b6 12. Re1 Bb7 13. Ne5 Nbd5 14. Qd3 Rc8 15. Qh3!
+Nxc3 16. bxc3 Qd5 17. Bd2 g6 {transfer Bishop to other diagonal} 18. Bc2 Qa5 19.
+Qh4 {pressurize dark squares} 19... Rxc3 20. Bb3 Nd5 21. Qh6 Bb4 22. Nd7 Rd8
+23. Bxd5 Rxd7 24. Rxe6 fxe6 25. Bxe6+ Kh8 26. Bxc3 Rd8 27. Qf4) 4. c3 Nf6 5. Bd3
+*
+
+[Event "?"]
+[Site "?"]
+[Date "????.??.??"]
+[Round "?"]
+[White "e4"]
+[Black "CaroCan, Pirc, Alekhine"]
+[Result "*"]
+
+1. e4 c6 (1... g6 {not french cant ip} 2. d4 Bg7 3. Nc3 d6 4. h4 {why this move
+?} 4... Nf6 5. Be2 {pirc opening}) (1... Nf6 {Alekhine} 2. e5 Nd5 3. Qf3 e6 4.
+Nc3 Nxc3 5. dxc3 {castle queen side  Qg3 Nf3 Bf4 Bd3}) 2. d4 d5 3. exd5 cxd5 4.
+c4 {take on d5 if black does not take on c4} 4... Nf6 5. Nc3 e6 6. Nf3 Be7 7.
+cxd5 exd5 {not great because cant push d pawn but still better position...}
+(7... Nxd5 8. Bd3 O-O 9. O-O) 8. Bd3 *
+
+
