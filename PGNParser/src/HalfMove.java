@@ -17,6 +17,8 @@ public class HalfMove {
 	
 	private String comment = "";
 	
+	boolean lastOfLevel = false;
+	
 	
 
 	public HalfMove(int number, boolean whitheOrBlack, String halfMove, int level, String comment) {
@@ -92,16 +94,21 @@ public class HalfMove {
 		return output.toString();
 	}
 
-	public int getPosition() {
+	/**
+	 * @return
+	 */
+	public int getColumn() {
 		return (this.level*2) + (this.isWhite() ? 0 : 1);
 	}
 	
-	
+	public int getHalfMoveNumber() {
+		return ((this.number-1) * 2) + (this.isWhite() ? 0 : 1);
+	}
 
 
 	@Override
 	public String toString() {
-		return " halfMove=" + halfMove + ", level=" + level	+ " pos " + getPosition();
+		return " halfMove=" + halfMove + ", level=" + level	+ " pos " + getColumn();
 	}
 
 	public String getAttribute() {
@@ -140,6 +147,14 @@ public class HalfMove {
 		all.add(commentLine.toString());
 		
 		return all;
+	}
+
+	public boolean isLastOfLevel() {
+		return lastOfLevel;
+	}
+
+	public void setLastOfLevel(boolean lastOfLevel) {
+		this.lastOfLevel = lastOfLevel;
 	}
 }
 

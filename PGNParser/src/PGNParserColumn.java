@@ -105,14 +105,17 @@ public class PGNParserColumn {
 
 			HalfMove currentA = allHalfMoves.get(i);
 			HalfMove nextA = allHalfMoves.get(i + 1);
+			
+			setLastLevelOf(allHalfMoves, i, currentA, nextA);
 
 			LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
 
 			allHalfMoves.addAll(i + 1, toInsert);
 
-			if (currentA.isWhite() && (currentA.getPosition() + 1 != nextA.getPosition())) {
+			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
 				// no black move for this white move
 				allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
+				currentA.setLastOfLevel(true);
 			}
 		}
 
@@ -137,6 +140,30 @@ public class PGNParserColumn {
 
 		System.out.println("first size is " + allStructured.size());
 		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
+	}
+
+	/**
+	 * 
+	 * @param allHalfMoves
+	 * @param i
+	 * @param currentA
+	 * @param nextA
+	 */
+	private void setLastLevelOf(LinkedList<HalfMove> allHalfMoves, int i, HalfMove currentA, HalfMove nextA) {
+		if (currentA.getLevel() != nextA.getLevel()) {
+			boolean nextMoveExists = false;
+			for (int j = i + 1; j < allHalfMoves.size(); j++) {
+				HalfMove futureHalfMove = allHalfMoves.get(j);
+				if (currentA.getLevel() == futureHalfMove.getLevel()
+						&& currentA.getHalfMoveNumber() + 1 == futureHalfMove.getHalfMoveNumber()) {
+					nextMoveExists = true;
+					break;
+				}
+			}
+			if (!nextMoveExists) {
+				currentA.setLastOfLevel(true);
+			}
+		}
 	}
 
 	/**
@@ -190,7 +217,7 @@ public class PGNParserColumn {
 		for (HalfMove half : allHalfMoves) {
 
 			// line completed
-			if (half.getPosition() == 0 && half.getNumber() != 1) {
+			if (half.getColumn() == 0 && half.getNumber() != 1) {
 				allStructured.add(currentLine);
 				currentLine = new ArrayList<HalfMove>();
 			}
@@ -208,7 +235,7 @@ public class PGNParserColumn {
 
 		LinkedList<HalfMove> toInsert = new LinkedList<HalfMove>();
 
-		if ((current.getPosition() + 1 != next.getPosition())) {
+		if ((current.getColumn() + 1 != next.getColumn())) {
 			// there is always a gap in position for new level..
 //          black alternate move
 //			w0  b0
@@ -218,7 +245,7 @@ public class PGNParserColumn {
 //			.   .   w1  b1
 
 			// insert needed
-			for (int i = 0; i < next.getPosition(); i++) {
+			for (int i = 0; i < next.getColumn(); i++) {
 				toInsert.add(new HalfMove(next.getNumber(), ((i % 2 == 0) ? true : false), ".", i / 2, ""));
 			}
 		}

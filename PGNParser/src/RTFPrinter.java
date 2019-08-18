@@ -85,10 +85,19 @@ public class RTFPrinter {
 				}
 
 				String halfMove = String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute());
-				if (cur.get(i).isWhite()) {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
+				
+				if (cur.get(i).isLastOfLevel()) {
+					if (cur.get(i).isWhite()) {
+						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, halfMove)))));
+					} else {
+						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, halfMove)))));
+					}
 				} else {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
+					if (cur.get(i).isWhite()) {
+						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
+					} else {
+						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
+					}
 				}
 
 				// comment is always on last item of line here..
