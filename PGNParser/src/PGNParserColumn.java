@@ -234,13 +234,13 @@ public class PGNParserColumn {
 		return toInsert;
 	}
 
-	private static void insertOne(LinkedList<HalfMove> allHalfMoves, int i, HalfMove nextA) {
-
-		HalfMove dummy = new HalfMove(nextA.getNumber(), (i % 2 == 0 ? true : false), ".", i / 2, "");
-
-		allHalfMoves.add(i + 1, dummy);
-		System.out.println(Arrays.deepToString(allHalfMoves.toArray()));
-	}
+//	private static void insertOne(LinkedList<HalfMove> allHalfMoves, int i, HalfMove nextA) {
+//
+//		HalfMove dummy = new HalfMove(nextA.getNumber(), (i % 2 == 0 ? true : false), ".", i / 2, "");
+//
+//		allHalfMoves.add(i + 1, dummy);
+//		System.out.println(Arrays.deepToString(allHalfMoves.toArray()));
+//	}
 
 	/**
 	 * 
