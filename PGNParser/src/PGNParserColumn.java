@@ -99,15 +99,18 @@ public class PGNParserColumn {
 		int moveNumber = 2;
 		int level = 0;
 
-		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level);
+		boolean doubleEndBrackets = false;
+		if (tokens.getLast().startsWith("(") && tokens.getLast().endsWith("))")) {
+			doubleEndBrackets = true;
+		}
+		
+		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level, doubleEndBrackets);
 
 		for (int i = 0; i < allHalfMoves.size() - 1; i++) {
 
 			HalfMove currentA = allHalfMoves.get(i);
 			HalfMove nextA = allHalfMoves.get(i + 1);
 			
-			setLastLevelOf(allHalfMoves, i, currentA, nextA);
-
 			LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
 
 			allHalfMoves.addAll(i + 1, toInsert);
@@ -115,7 +118,7 @@ public class PGNParserColumn {
 			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
 				// no black move for this white move
 				allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
-				currentA.setLastOfLevel(true);
+				//currentA.setLastOfLevel(true);
 			}
 		}
 
@@ -142,29 +145,8 @@ public class PGNParserColumn {
 		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
 	}
 
-	/**
-	 * 
-	 * @param allHalfMoves
-	 * @param i
-	 * @param currentA
-	 * @param nextA
-	 */
-	private void setLastLevelOf(LinkedList<HalfMove> allHalfMoves, int i, HalfMove currentA, HalfMove nextA) {
-		if (currentA.getLevel() != nextA.getLevel()) {
-			boolean nextMoveExists = false;
-			for (int j = i + 1; j < allHalfMoves.size(); j++) {
-				HalfMove futureHalfMove = allHalfMoves.get(j);
-				if (currentA.getLevel() == futureHalfMove.getLevel()
-						&& currentA.getHalfMoveNumber() + 1 == futureHalfMove.getHalfMoveNumber()) {
-					nextMoveExists = true;
-					break;
-				}
-			}
-			if (!nextMoveExists) {
-				currentA.setLastOfLevel(true);
-			}
-		}
-	}
+
+
 
 	/**
 	 * 
@@ -267,8 +249,9 @@ public class PGNParserColumn {
 	 * @param level
 	 * @return
 	 */
-	private static LinkedList<HalfMove> createMoves(LinkedList<String> tokens, int moveNumber, int level) {
+	private static LinkedList<HalfMove> createMoves(LinkedList<String> tokens, int moveNumber, int level, boolean doubleEndBrackets) {
 		LinkedList<HalfMove> halfMoves = new LinkedList<HalfMove>();
+		
 
 		for (String token : tokens) {
 			if (token.startsWith("{")) {
@@ -279,17 +262,27 @@ public class PGNParserColumn {
 			} else if (token.startsWith("(")) {
 
 				String newLevel = token.replaceFirst("\\(", "");
+				System.out.println("token " + token);
+
+				//check from last level
+				if (doubleEndBrackets) {
+					halfMoves.getLast().setLastOfLevel(true);
+				}
+				
+				// for next level
+				if (token.endsWith("))")) {
+					doubleEndBrackets = true;
+				}
+				
 				char last = newLevel.charAt(newLevel.length() - 1);
-				if (last != ')') {
-					System.err.print("last char was not )");
-				} else {
+				if (last == ')') {
 					// trim last
 					newLevel = newLevel.substring(0, newLevel.length() - 1);
 					// System.out.println("level !" + newLevel);
 				}
 
 				// next same move number but new level
-				halfMoves.addAll(createMoves(tokenize(newLevel), moveNumber - 1, level + 1));
+				halfMoves.addAll(createMoves(tokenize(newLevel), moveNumber - 1, level + 1, doubleEndBrackets));
 
 			} else {
 				// only increase move number if it is a move
@@ -297,6 +290,9 @@ public class PGNParserColumn {
 				moveNumber++;
 			}
 		}
+		
+		halfMoves.getLast().setLastOfLevel(true);
+		
 		return halfMoves;
 	}
 
