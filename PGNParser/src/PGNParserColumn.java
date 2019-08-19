@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,36 +108,15 @@ public class PGNParserColumn {
 		
 		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level, doubleEndBrackets);
 
-		for (int i = 0; i < allHalfMoves.size() - 1; i++) {
+		Integer maxColumn = allHalfMoves.stream().mapToInt(HalfMove::getColumn).max().getAsInt();
+		System.out.println("maxColumn " + maxColumn);
 
-			HalfMove currentA = allHalfMoves.get(i);
-			HalfMove nextA = allHalfMoves.get(i + 1);
+		ArrayList<PGNLine> allStructured = createdStrucuted(allHalfMoves, maxColumn);
+		
+		for (PGNLine line : PGNLine) {
 			
-			LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
-
-			allHalfMoves.addAll(i + 1, toInsert);
-
-			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
-				// no black move for this white move
-				allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
-				//currentA.setLastOfLevel(true);
-			}
 		}
 
-		ArrayList<ArrayList<HalfMove>> allStructured = createdStrucuted(allHalfMoves);
-
-		for (ArrayList<HalfMove> cur : allStructured) {
-			StringBuilder previousCommentsOfLine = new StringBuilder();
-			for (int i = 0; i < cur.size(); i++) {
-				if (i < cur.size() - 1) {
-					previousCommentsOfLine.append(cur.get(i).getComment());
-					cur.get(i).setComment("");
-				} else {
-//						add it
-					cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
-				}
-			}
-		}
 
 		StringBuilder all = printIt(pgnHeaderData, allStructured);
 //			Parses PGN Files and formats them into columns for better readability
@@ -191,56 +172,42 @@ public class PGNParserColumn {
 	 * 
 	 * @param allHalfMoves
 	 */
-	private static ArrayList<ArrayList<HalfMove>> createdStrucuted(LinkedList<HalfMove> allHalfMoves) {
-		ArrayList<ArrayList<HalfMove>> allStructured = new ArrayList<ArrayList<HalfMove>>();
+	private static ArrayList<PGNLine> createdStrucuted(LinkedList<HalfMove> allHalfMoves, int maxLevel) {
+		
+		ArrayList<PGNLine> allStructured = new ArrayList<PGNLine>();
 
-		ArrayList<HalfMove> currentLine = new ArrayList<HalfMove>();
+		boolean[] openColums = new boolean[maxLevel/2];
+		Arrays.fill(openColums, Boolean.FALSE);
+		PGNLine currentLine = new  PGNLine(maxLevel, openColums);
 
+		int previousColumn = 0;
 		for (HalfMove half : allHalfMoves) {
+			
+			openColums[half.getLevel()] = true;
 
 			// line completed
-			if (half.getColumn() == 0 && half.getNumber() != 1) {
+			if (half.getColumn() < previousColumn  || half.isLastOfLevel()) {
+				
+				if (half.isLastOfLevel()) {
+					openColums[half.getLevel()] = false;
+				}
+				
 				allStructured.add(currentLine);
-				currentLine = new ArrayList<HalfMove>();
+				currentLine = new  PGNLine(maxLevel, Arrays.copyOf(openColums, maxLevel/2));
 			}
-			currentLine.add(half);
+			//TODO Create Setters
+			currentLine.getCommentOfLine().append(half.getComment() + " ");
+			currentLine.getCurrentLine()[half.getColumn()] =  half;
+			previousColumn = half.getColumn();
 		}
 
-		currentLine.add(new HalfMove(0, currentLine.size() % 2 == 0, "end", 0, "end"));
 		// add last line too
 		allStructured.add(currentLine);
 
 		return allStructured;
 	}
 
-	private static LinkedList<HalfMove> insertsBefore(HalfMove current, HalfMove next) {
 
-		LinkedList<HalfMove> toInsert = new LinkedList<HalfMove>();
-
-		if ((current.getColumn() + 1 != next.getColumn())) {
-			// there is always a gap in position for new level..
-//          black alternate move
-//			w0  b0
-//			.   .   .  b1
-//			white alternative move
-//			w0  .
-//			.   .   w1  b1
-
-			// insert needed
-			for (int i = 0; i < next.getColumn(); i++) {
-				toInsert.add(new HalfMove(next.getNumber(), ((i % 2 == 0) ? true : false), ".", i / 2, ""));
-			}
-		}
-		return toInsert;
-	}
-
-//	private static void insertOne(LinkedList<HalfMove> allHalfMoves, int i, HalfMove nextA) {
-//
-//		HalfMove dummy = new HalfMove(nextA.getNumber(), (i % 2 == 0 ? true : false), ".", i / 2, "");
-//
-//		allHalfMoves.add(i + 1, dummy);
-//		System.out.println(Arrays.deepToString(allHalfMoves.toArray()));
-//	}
 
 	/**
 	 * 
