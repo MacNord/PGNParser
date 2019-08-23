@@ -28,10 +28,8 @@ public class RTFPrinter {
 
 	public static void main(String[] args) throws IOException {
 
-		Rtf.rtf()
-				.header(color(185, 185, 185).at(1), color(2, 0xff, 0).at(2), color(3, 0, 0xff).at(3),
-						font("Noto Mono").at(1))
-				.section(extracted()).out(new FileWriter("out.rtf"));
+		Rtf.rtf().header(color(185, 185, 185).at(1), color(2, 0xff, 0).at(2), color(3, 0, 0xff).at(3),
+				font("Noto Mono").at(1)).section(extracted()).out(new FileWriter("out.rtf"));
 
 //		 Rtf.rtf().p( "Hello World" ).out( new FileWriter("out.rtf") );
 //		 
@@ -50,95 +48,116 @@ public class RTFPrinter {
 	private static RtfTextPara[] extracted() {
 
 		ArrayList<RtfTextPara> all = new ArrayList<RtfTextPara>();
-		
-		all.add(p(fontSize(32, color(1, bold(shadow("exd5")))),fontSize(32, color(1, bold(shadow("aaa"))))));
+
+		all.add(p(fontSize(32, color(1, bold(shadow("exd5")))), fontSize(32, color(1, bold(shadow("aaa"))))));
 		all.add(p(fontSize(32, color(1, bold(shadow("exd5"))))));
 
-		return  all.toArray( new RtfTextPara[2]);
+		return all.toArray(new RtfTextPara[2]);
 	}
 
-//	public CharSequence printRTF(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) throws IOException {
-//
-//
-//	}
-
-	public static ArrayList<RtfTextPara> getParagraphs(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
+	public static ArrayList<RtfTextPara> getParagraphs(ArrayList<String> header, ArrayList<PGNLine> allStructured) {
 
 		ArrayList<RtfTextPara> oneGame = new ArrayList<RtfTextPara>();
-				
+
 		for (String headerLine : header) {
-			oneGame.add(p(fontSize(FONT_SIZE, font(1,headerLine))));
+			oneGame.add(p(fontSize(FONT_SIZE, font(1, headerLine))));
 		}
-	
 
-		ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
-		
-		for (ArrayList<HalfMove> cur : allStructured) {
+		for (PGNLine cur : allStructured) {
 
-			for (int i = 0; i < cur.size(); i++) {
-				if (i == 0) {
-					oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
-					currentRTFTextLine = new ArrayList<RtfText>();
-
-					// number always here..
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.get(i).getNumber() + ". "))));
+			ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
+			
+			// line number
+			for (int j = 0; j < cur.currentLine.length; j++) {
+				if (cur.currentLine[j] != null) {
+					currentRTFTextLine.add(fontSize(FONT_SIZE,
+							font(1, String.format("%4s", cur.currentLine[j].getNumber() + ". "))));
+					break;
 				}
+			}
 
-				String halfMove = String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute());
-				
-				if (cur.get(i).isLastOfLevel()) {
-					if (cur.get(i).isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, halfMove)))));
-					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, halfMove)))));
+			boolean afterHalfMove = false;
+			for (int i = 0; i < cur.currentLine.length; i++) {
+			
+				if (cur.currentLine[i] == null) {
+					if (!afterHalfMove) {
+						String blankMove;
+						if (cur.openLevel[i / 2]) {
+							blankMove = String.format("%6s", ".");
+						} else {
+							blankMove = String.format("%6s", " ");
+						}
+						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, blankMove)))));
 					}
+					// insert blank
 				} else {
-					if (cur.get(i).isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
-					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
-					}
-				}
+					
+					afterHalfMove = true;
 
-				// comment is always on last item of line here..
-				if (!cur.get(i).getComment().isEmpty()) {
-					ArrayList<String> allComments = cur.get(i).getStructuredComments(38);
-					for (String commentLine : allComments) {
-						oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
-						currentRTFTextLine = new ArrayList<RtfText>();
-						currentRTFTextLine.add(
-								fontSize(FONT_SIZE, font(1, color(3,"                                        " + commentLine))));
+					String halfMove = String.format("%6s",
+							cur.currentLine[i].getHalfMove() + cur.currentLine[i].getAttribute());
+
+					if (cur.currentLine[i].isLastOfLevel()) {
+						if (cur.currentLine[i].isWhite()) {
+							currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, halfMove)))));
+						} else {
+							currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, halfMove)))));
+						}
+					} else {
+						if (cur.currentLine[i].isWhite()) {
+							currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
+						} else {
+							currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
+						}
 					}
 				}
 			}
+
+//			if (!cur.getCommentOfLine().toString().isEmpty()) {
+//				ArrayList<String> allComments = getStructuredComments(cur.getCommentOfLine().toString(), 38);
+//				for (String commentLine : allComments) {
+//					oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
+//					currentRTFTextLine = new ArrayList<RtfText>();
+//					currentRTFTextLine.add(fontSize(FONT_SIZE,
+//							font(1, color(3, "                                        " + commentLine))));
+//				}
+//			}
+			oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
 		}
 		System.out.println("size is " + oneGame.size());
-		
-//		StringBuilder all = new StringBuilder();
-//		for (ArrayList<HalfMove> cur : allStructured) {
-//
-//			for (int i = 0; i < cur.size(); i++) {
-//				if (i == 0) {
-//					all.append(LINE_SEPARATOR);
-//					// number always here..
-//					all.append(String.format("%3s", cur.get(i).getNumber() + ". "));
-//				}
-//				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
-//
-//				// comment is always on last item of line here..
-//				if (!cur.get(i).getComment().isEmpty()) {
-//					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
-//					for (String commentLine : allComments) {
-//						all.append(LINE_SEPARATOR);
-//						all.append("                                        c:|" + commentLine);
-//					}
-//				}
-//
-//			}
-//		}
-//		return all;
 
-		return  oneGame;
+		return oneGame;
+	}
+
+	/**
+	 * Splits comments
+	 * 
+	 * @param maxLenght
+	 * @return
+	 */
+	public static ArrayList<String> getStructuredComments(String comment, int maxLenght) {
+
+		String[] commentToken = comment.replace("{", " ").replace("}", " ").split(" ");
+
+		StringBuilder commentLine = new StringBuilder();
+		ArrayList<String> all = new ArrayList<String>();
+
+		for (int i = 0; i < commentToken.length; i++) {
+			String word = commentToken[i];
+
+			if (!word.isEmpty()) {
+				if ((commentLine.length() + word.length() + 1) > maxLenght) {
+					all.add(commentLine.toString());
+					commentLine.setLength(0);
+				}
+				commentLine.append(word);
+				commentLine.append(" ");
+			}
+		}
+		// last line
+		all.add(commentLine.toString());
+
+		return all;
 	}
 
 }

@@ -1,15 +1,14 @@
-
 public class PGNLine {
 	
 	
 	HalfMove[] currentLine;
-	boolean[] openColums;
+	boolean[] openLevel;
 	
 	StringBuilder commentOfLine  = new StringBuilder();
 	
-	public PGNLine(int maxColumn, boolean[] openColums) {
+	public PGNLine(int maxColumn, boolean[] openLevel) {
 		this.currentLine = new HalfMove[maxColumn];
-		this.openColums = openColums;
+		this.openLevel = openLevel;
 	}
 
 	public HalfMove[] getCurrentLine() {

@@ -18,8 +18,14 @@ public class HalfMove {
 	private String comment = "";
 	
 	boolean lastOfLevel = false;
-	
-	
+
+	/**
+	 * for dummy entries 
+	 * @param halfMove
+	 */
+	public HalfMove(String halfMove) {
+		this.halfMove = halfMove;
+	}
 
 	public HalfMove(int number, boolean whitheOrBlack, String halfMove, int level, String comment) {
 		this.number = number;
@@ -118,36 +124,7 @@ public class HalfMove {
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
 	}
-	
-	/**
-	 * Splits comments 
-	 * @param maxLenght
-	 * @return
-	 */
-	public ArrayList<String> getStructuredComments(int maxLenght) {
 
-		String[] commentToken = this.comment.replace("{", " ").replace("}", " ").split(" ");
-
-		StringBuilder commentLine = new StringBuilder();
-		ArrayList<String> all = new ArrayList<String>();
-
-		for (int i = 0; i < commentToken.length; i++) {
-			String word = commentToken[i];
-
-			if (!word.isEmpty()) {
-				if ((commentLine.length() + word.length() + 1) > maxLenght) {
-					all.add(commentLine.toString());
-					commentLine.setLength(0);
-				}
-				commentLine.append(word);
-				commentLine.append(" ");
-			}
-		}
-		// last line
-		all.add(commentLine.toString());
-		
-		return all;
-	}
 
 	public boolean isLastOfLevel() {
 		return lastOfLevel;

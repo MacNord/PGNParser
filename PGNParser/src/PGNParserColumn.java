@@ -1,5 +1,6 @@
 
 import static com.tutego.jrtf.RtfHeader.color;
+
 import static com.tutego.jrtf.RtfHeader.font;
 
 import java.io.BufferedReader;
@@ -20,6 +21,11 @@ import java.util.regex.Pattern;
 
 import com.tutego.jrtf.Rtf;
 import com.tutego.jrtf.RtfTextPara;
+
+/**
+ * Parses PGN Files and formats them into columns for better readability
+ * @author casanova
+ */
 
 public class PGNParserColumn {
 
@@ -108,22 +114,25 @@ public class PGNParserColumn {
 		
 		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level, doubleEndBrackets);
 
-		Integer maxColumn = allHalfMoves.stream().mapToInt(HalfMove::getColumn).max().getAsInt();
-		System.out.println("maxColumn " + maxColumn);
+		Integer maxLevel = allHalfMoves.stream().mapToInt(HalfMove::getLevel).max().getAsInt();
+		maxLevel = maxLevel + 1; //since level starts with 0
+		System.out.println("maxLevel " + maxLevel);
 
-		ArrayList<PGNLine> allStructured = createdStrucuted(allHalfMoves, maxColumn);
-		
-		for (PGNLine line : PGNLine) {
-			
+		ArrayList<PGNLine> allStructured = createdStrucuted(allHalfMoves, maxLevel);
+
+		for (PGNLine line : allStructured) {
+			System.out.println(Arrays.toString(line.openLevel));
+			System.out.println(Arrays.toString(line.getCurrentLine()));
 		}
 
-
 		StringBuilder all = printIt(pgnHeaderData, allStructured);
-//			Parses PGN Files and formats them into columns for better readability
+
 		System.out.println(all);
 
 		System.out.println("first size is " + allStructured.size());
 		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
+	
+
 	}
 
 
@@ -134,7 +143,7 @@ public class PGNParserColumn {
 	 * @param allStructured
 	 * @return
 	 */
-	private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
+	private static StringBuilder printIt(ArrayList<String> header, ArrayList<PGNLine> allStructured) {
 
 		StringBuilder all = new StringBuilder();
 
@@ -143,26 +152,23 @@ public class PGNParserColumn {
 			all.append(LINE_SEPARATOR);
 		}
 
-		for (ArrayList<HalfMove> cur : allStructured) {
+		for (PGNLine cur : allStructured) {
+			for (int i = 0; i < cur.getCurrentLine().length; i++) {
+				HalfMove currHalfMove = cur.getCurrentLine()[i];
 
-			for (int i = 0; i < cur.size(); i++) {
-				if (i == 0) {
-					all.append(LINE_SEPARATOR);
-					// number always here..
-					all.append(String.format("%4s", cur.get(i).getNumber() + ". "));
-				}
-				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+				if (currHalfMove != null) {
 
-				// comment is always on last item of line here..
-				if (!cur.get(i).getComment().isEmpty()) {
-					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
-					for (String commentLine : allComments) {
+					if (i == 0) {
 						all.append(LINE_SEPARATOR);
-						all.append("                                        c:|" + commentLine);
+						// number always here..
+						all.append(String.format("%4s", currHalfMove.getNumber() + ". "));
 					}
+					all.append(String.format("%6s", currHalfMove.getHalfMove() + currHalfMove.getAttribute()) + " |");
 				}
-
 			}
+			// comment is always on last item of line here..
+			all.append(LINE_SEPARATOR);
+			all.append("                                        c:|" + cur.getCommentOfLine());
 		}
 		return all;
 	}
@@ -176,29 +182,37 @@ public class PGNParserColumn {
 		
 		ArrayList<PGNLine> allStructured = new ArrayList<PGNLine>();
 
-		boolean[] openColums = new boolean[maxLevel/2];
-		Arrays.fill(openColums, Boolean.FALSE);
-		PGNLine currentLine = new  PGNLine(maxLevel, openColums);
+		boolean[] openLevel = new boolean[maxLevel];
+		Arrays.fill(openLevel, Boolean.FALSE);
+		PGNLine currentLine = new  PGNLine(maxLevel*2, Arrays.copyOf(openLevel, openLevel.length));
 
 		int previousColumn = 0;
+		boolean previousLastOfLevel = false;
+		int previousLevel = 0;
+		
 		for (HalfMove half : allHalfMoves) {
 			
-			openColums[half.getLevel()] = true;
+			openLevel[half.getLevel()] = true;
 
 			// line completed
-			if (half.getColumn() < previousColumn  || half.isLastOfLevel()) {
-				
-				if (half.isLastOfLevel()) {
-					openColums[half.getLevel()] = false;
-				}
+			if (half.getColumn() < previousColumn  || previousLastOfLevel || previousLevel != half.getLevel()) {
 				
 				allStructured.add(currentLine);
-				currentLine = new  PGNLine(maxLevel, Arrays.copyOf(openColums, maxLevel/2));
+				currentLine = new  PGNLine(maxLevel*2,  Arrays.copyOf(openLevel, openLevel.length));
+				
 			}
+			
+			if (half.isLastOfLevel()) {
+				openLevel[half.getLevel()] = false;
+			}
+			
 			//TODO Create Setters
 			currentLine.getCommentOfLine().append(half.getComment() + " ");
 			currentLine.getCurrentLine()[half.getColumn()] =  half;
 			previousColumn = half.getColumn();
+			previousLastOfLevel = half.isLastOfLevel();
+			previousLevel = half.getLevel();
+			 
 		}
 
 		// add last line too
