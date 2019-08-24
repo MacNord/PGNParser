@@ -113,15 +113,18 @@ public class RTFPrinter {
 				}
 			}
 
-//			if (!cur.getCommentOfLine().toString().isEmpty()) {
-//				ArrayList<String> allComments = getStructuredComments(cur.getCommentOfLine().toString(), 38);
-//				for (String commentLine : allComments) {
-//					oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
-//					currentRTFTextLine = new ArrayList<RtfText>();
-//					currentRTFTextLine.add(fontSize(FONT_SIZE,
-//							font(1, color(3, "                                        " + commentLine))));
-//				}
-//			}
+			if (!cur.getCommentOfLine().toString().isEmpty()) {
+				ArrayList<String> allComments = getStructuredComments(cur.getCommentOfLine().toString(), 38);
+				for (String commentLine : allComments) {
+					oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
+					currentRTFTextLine = new ArrayList<RtfText>();
+					currentRTFTextLine.add(fontSize(FONT_SIZE,
+							font(1, color(3, "                                        " + commentLine))));
+				}
+//				currentRTFTextLine.add(fontSize(FONT_SIZE,
+//						font(1, color(3, "                                        " + cur.getCommentOfLine().toString()))));
+
+			}
 			oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
 		}
 		System.out.println("size is " + oneGame.size());

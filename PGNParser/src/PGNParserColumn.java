@@ -206,8 +206,11 @@ public class PGNParserColumn {
 				openLevel[half.getLevel()] = false;
 			}
 			
-			//TODO Create Setters
-			currentLine.getCommentOfLine().append(half.getComment() + " ");
+			// TODO Create Setters
+			if (!half.getComment().isEmpty()) {
+				currentLine.getCommentOfLine().append(half.getComment() + " ");
+			}
+			
 			currentLine.getCurrentLine()[half.getColumn()] =  half;
 			previousColumn = half.getColumn();
 			previousLastOfLevel = half.isLastOfLevel();
