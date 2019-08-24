@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -104,144 +105,61 @@ public class PGNParserColumn {
 			doubleEndBrackets = true;
 		}
 		
-		LinkedList<HalfMove> allHalfMoves = createMoves(tokens, moveNumber, level, doubleEndBrackets);
+		PGNTree root = PGNTree.createRootNode();
+		createMoves(tokens, root, moveNumber, level, doubleEndBrackets);
+		
+		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
+		allPGNTrees = root.toFlatList(allPGNTrees);
+		System.out.println("size is  " + allPGNTrees.size() );
+		
+		//sort moves
+		Collections.sort(allPGNTrees);
+		System.out.println("sorted");
+		
+		System.out.println(Arrays.toString(allPGNTrees.toArray()));
+		
+		ArrayList<ArrayList<PGNTree>> allStructured = createLines(allPGNTrees);
 
-		for (int i = 0; i < allHalfMoves.size() - 1; i++) {
-
-			HalfMove currentA = allHalfMoves.get(i);
-			HalfMove nextA = allHalfMoves.get(i + 1);
-			
-			LinkedList<HalfMove> toInsert = insertsBefore(currentA, nextA);
-
-			allHalfMoves.addAll(i + 1, toInsert);
-
-			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
-				// no black move for this white move
-				allHalfMoves.add(i + 1, new HalfMove(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
-				//currentA.setLastOfLevel(true);
-			}
-		}
-
-		ArrayList<ArrayList<HalfMove>> allStructured = createdStrucuted(allHalfMoves);
-
-		for (ArrayList<HalfMove> cur : allStructured) {
-			StringBuilder previousCommentsOfLine = new StringBuilder();
-			for (int i = 0; i < cur.size(); i++) {
-				if (i < cur.size() - 1) {
-					previousCommentsOfLine.append(cur.get(i).getComment());
-					cur.get(i).setComment("");
-				} else {
-//						add it
-					cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
-				}
-			}
-		}
+//		for (int i = 0; i < allPGNTrees.size() - 1; i++) {
+//
+//			PGNTree currentA = allPGNTrees.get(i);
+//			PGNTree nextA = allPGNTrees.get(i + 1);
+//			
+//			LinkedList<PGNTree> toInsert = insertsBefore(currentA, nextA);
+//
+//			allPGNTrees.addAll(i + 1, toInsert);
+//
+//			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
+//				// no black move for this white move
+//				allPGNTrees.add(i + 1, new PGNTree(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
+//				//currentA.setLastOfLevel(true);
+//			}
+//		}
+//
+//		ArrayList<ArrayList<PGNTree>> allStructured = createdStrucuted(allPGNTrees);
+//
+//		for (ArrayList<PGNTree> cur : allStructured) {
+//			StringBuilder previousCommentsOfLine = new StringBuilder();
+//			for (int i = 0; i < cur.size(); i++) {
+//				if (i < cur.size() - 1) {
+//					previousCommentsOfLine.append(cur.get(i).getComment());
+//					cur.get(i).setComment("");
+//				} else {
+////						add it
+//					cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
+//				}
+//			}
+//		}
 
 		StringBuilder all = printIt(pgnHeaderData, allStructured);
-//			Parses PGN Files and formats them into columns for better readability
+////			Parses PGN Files and formats them into columns for better readability
 		System.out.println(all);
-
-		System.out.println("first size is " + allStructured.size());
-		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
-	}
-
-
-
-
-	/**
-	 * 
-	 * @param allStructured
-	 * @return
-	 */
-	private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
-
-		StringBuilder all = new StringBuilder();
-
-		for (String headerLine : header) {
-			all.append(headerLine);
-			all.append(LINE_SEPARATOR);
-		}
-
-		for (ArrayList<HalfMove> cur : allStructured) {
-
-			for (int i = 0; i < cur.size(); i++) {
-				if (i == 0) {
-					all.append(LINE_SEPARATOR);
-					// number always here..
-					all.append(String.format("%4s", cur.get(i).getNumber() + ". "));
-				}
-				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
-
-				// comment is always on last item of line here..
-				if (!cur.get(i).getComment().isEmpty()) {
-					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
-					for (String commentLine : allComments) {
-						all.append(LINE_SEPARATOR);
-						all.append("                                        c:|" + commentLine);
-					}
-				}
-
-			}
-		}
-		return all;
-	}
-
-	/**
-	 * Double dimension plus end elements.
-	 * 
-	 * @param allHalfMoves
-	 */
-	private static ArrayList<ArrayList<HalfMove>> createdStrucuted(LinkedList<HalfMove> allHalfMoves) {
-		ArrayList<ArrayList<HalfMove>> allStructured = new ArrayList<ArrayList<HalfMove>>();
-
-		ArrayList<HalfMove> currentLine = new ArrayList<HalfMove>();
-
-		for (HalfMove half : allHalfMoves) {
-
-			// line completed
-			if (half.getColumn() == 0 && half.getNumber() != 1) {
-				allStructured.add(currentLine);
-				currentLine = new ArrayList<HalfMove>();
-			}
-			currentLine.add(half);
-		}
-
-		currentLine.add(new HalfMove(0, currentLine.size() % 2 == 0, "end", 0, "end"));
-		// add last line too
-		allStructured.add(currentLine);
-
-		return allStructured;
-	}
-
-	private static LinkedList<HalfMove> insertsBefore(HalfMove current, HalfMove next) {
-
-		LinkedList<HalfMove> toInsert = new LinkedList<HalfMove>();
-
-		if ((current.getColumn() + 1 != next.getColumn())) {
-			// there is always a gap in position for new level..
-//          black alternate move
-//			w0  b0
-//			.   .   .  b1
-//			white alternative move
-//			w0  .
-//			.   .   w1  b1
-
-			// insert needed
-			for (int i = 0; i < next.getColumn(); i++) {
-				toInsert.add(new HalfMove(next.getNumber(), ((i % 2 == 0) ? true : false), ".", i / 2, ""));
-			}
-		}
-		return toInsert;
-	}
-
-//	private static void insertOne(LinkedList<HalfMove> allHalfMoves, int i, HalfMove nextA) {
 //
-//		HalfMove dummy = new HalfMove(nextA.getNumber(), (i % 2 == 0 ? true : false), ".", i / 2, "");
-//
-//		allHalfMoves.add(i + 1, dummy);
-//		System.out.println(Arrays.deepToString(allHalfMoves.toArray()));
-//	}
-
+//		System.out.println("first size is " + allStructured.size());
+//		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
+		return null;
+	}
+	
 	/**
 	 * 
 	 * @param tokens
@@ -249,16 +167,16 @@ public class PGNParserColumn {
 	 * @param level
 	 * @return
 	 */
-	private static LinkedList<HalfMove> createMoves(LinkedList<String> tokens, int moveNumber, int level, boolean doubleEndBrackets) {
-		LinkedList<HalfMove> halfMoves = new LinkedList<HalfMove>();
+	private static PGNTree createMoves(LinkedList<String> tokens, PGNTree root , int moveNumber, int level, boolean doubleEndBrackets) {
 		
+		PGNTree newNode = root;
 
 		for (String token : tokens) {
 			if (token.startsWith("{")) {
-				halfMoves.getLast().setComment(token);
+				root.setComment(token);
 			} else if (token.startsWith("+") || token.startsWith("?") || token.startsWith("!")
 					|| token.startsWith("#")) {
-				halfMoves.getLast().setAttribute(token);
+				root.setAttribute(token);
 			} else if (token.startsWith("(")) {
 
 				String newLevel = token.replaceFirst("\\(", "");
@@ -266,7 +184,7 @@ public class PGNParserColumn {
 
 				//check from last level
 				if (doubleEndBrackets) {
-					halfMoves.getLast().setLastOfLevel(true);
+					root.setLastOfLevel(true);
 				}
 				
 				// for next level
@@ -282,19 +200,149 @@ public class PGNParserColumn {
 				}
 
 				// next same move number but new level
-				halfMoves.addAll(createMoves(tokenize(newLevel), moveNumber - 1, level + 1, doubleEndBrackets));
+				newNode = createMoves(tokenize(newLevel), root, moveNumber - 1, level + 1, doubleEndBrackets);
 
 			} else {
 				// only increase move number if it is a move
-				halfMoves.add(new HalfMove(moveNumber / 2, (moveNumber % 2 == 0 ? true : false), token, level, ""));
+				System.out.println("old" + newNode);
+				newNode = newNode.createChildNode(moveNumber / 2, (moveNumber % 2 == 0 ? true : false), token, level, "");
+				System.out.println("new" + newNode);
 				moveNumber++;
 			}
 		}
 		
-		halfMoves.getLast().setLastOfLevel(true);
+		newNode.setLastOfLevel(true);
 		
-		return halfMoves;
+		return newNode;
 	}
+
+
+
+
+	/**
+	 * 
+	 * @param allStructured
+	 * @return
+	 */
+	private static StringBuilder printIt(ArrayList<String> header, ArrayList<ArrayList<PGNTree>> allStructured) {
+
+		StringBuilder all = new StringBuilder();
+
+		for (String headerLine : header) {
+			all.append(headerLine);
+			all.append(LINE_SEPARATOR);
+		}
+
+		for (ArrayList<PGNTree> cur : allStructured) {
+
+			for (int i = 0; i < cur.size(); i++) {
+//				if (i == 0) {
+					all.append(LINE_SEPARATOR);
+					// number always here..
+					all.append(String.format("%4s", cur.get(i).getPosition() + ". "));
+//				}
+				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+
+				// comment is always on last item of line here..
+//				if (!cur.get(i).getComment().isEmpty()) {
+//					ArrayList<String> allComments = cur.get(i).getStructuredComments(35);
+//					for (String commentLine : allComments) {
+//						all.append(LINE_SEPARATOR);
+//						all.append("                                        c:|" + commentLine);
+//					}
+//				}
+
+			}
+		}
+		return all;
+	}
+	
+	/**
+	 * Double dimension plus end elements.
+	 * 
+	 * @param allPGNTrees
+	 */
+	private static ArrayList<ArrayList<PGNTree>> createLines(LinkedList<PGNTree> allPGNTrees) {
+		ArrayList<ArrayList<PGNTree>> allStructured = new ArrayList<ArrayList<PGNTree>>();
+		ArrayList<PGNTree> currentLine = new ArrayList<PGNTree>();
+		
+		int previousNumber = -1;
+		for (PGNTree half : allPGNTrees) {
+			
+			// line completed
+			if (half.getNumber() != previousNumber) {
+				allStructured.add(currentLine);
+				currentLine = new ArrayList<PGNTree>();
+			}
+			currentLine.add(half);
+			
+			previousNumber = half.getNumber();
+		}
+
+		//currentLine.add(new PGNTree(0, currentLine.size() % 2 == 0, "end", 0, "end"));
+		// add last line too
+		allStructured.add(currentLine);
+
+		return allStructured;
+	}
+
+	/**
+	 * Double dimension plus end elements.
+	 * 
+	 * @param allPGNTrees
+	 */
+	private static ArrayList<ArrayList<PGNTree>> createdStrucuted(LinkedList<PGNTree> allPGNTrees) {
+		ArrayList<ArrayList<PGNTree>> allStructured = new ArrayList<ArrayList<PGNTree>>();
+
+		ArrayList<PGNTree> currentLine = new ArrayList<PGNTree>();
+
+		for (PGNTree half : allPGNTrees) {
+
+			// line completed
+			if (half.getColumn() == 0 && half.getNumber() != 1) {
+				allStructured.add(currentLine);
+				currentLine = new ArrayList<PGNTree>();
+			}
+			currentLine.add(half);
+		}
+
+		currentLine.add(PGNTree.createRootNode());
+		// add last line too
+		allStructured.add(currentLine);
+
+		return allStructured;
+	}
+
+	private static LinkedList<PGNTree> insertsBefore(PGNTree current, PGNTree next) {
+
+		LinkedList<PGNTree> toInsert = new LinkedList<PGNTree>();
+
+		if ((current.getColumn() + 1 != next.getColumn())) {
+			// there is always a gap in position for new level..
+//          black alternate move
+//			w0  b0
+//			.   .   .  b1
+//			white alternative move
+//			w0  .
+//			.   .   w1  b1
+
+			// insert needed
+			for (int i = 0; i < next.getColumn(); i++) {
+				toInsert.add(PGNTree.createRootNode());
+			}
+		}
+		return toInsert;
+	}
+
+//	private static void insertOne(LinkedList<PGNTree> allPGNTrees, int i, PGNTree nextA) {
+//
+//		PGNTree dummy = new PGNTree(nextA.getNumber(), (i % 2 == 0 ? true : false), ".", i / 2, "");
+//
+//		allPGNTrees.add(i + 1, dummy);
+//		System.out.println(Arrays.deepToString(allPGNTrees.toArray()));
+//	}
+
+
 
 	private static LinkedList<String> tokenize(String oneLIne) {
 		String regex = "\\{.*?\\}|\\(|\\)|[BRQNK][a-h][1-8]| [a-h][1-8]|[BRQNK][a-h][a-h][1-8]|O-O|0-0-0|[BRQNK]x[a-h][1-8]|[a-h]x[a-h][1-8]|[\\+|\\?|\\!|\\#]?[\\+|\\?|\\!||\\#]|1\\/2-1\\/2|1\\/-O|O-\\/1";

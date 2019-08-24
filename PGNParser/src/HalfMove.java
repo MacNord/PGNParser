@@ -104,6 +104,7 @@ public class HalfMove {
 	public int getHalfMoveNumber() {
 		return ((this.number-1) * 2) + (this.isWhite() ? 0 : 1);
 	}
+	
 
 
 	@Override

@@ -1,26 +1,19 @@
-import java.awt.List;
+import static com.tutego.jrtf.RtfHeader.color;
+import static com.tutego.jrtf.RtfHeader.font;
+import static com.tutego.jrtf.RtfPara.p;
+import static com.tutego.jrtf.RtfText.bold;
+import static com.tutego.jrtf.RtfText.color;
+import static com.tutego.jrtf.RtfText.font;
+import static com.tutego.jrtf.RtfText.fontSize;
+import static com.tutego.jrtf.RtfText.shadow;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import javax.swing.event.ListSelectionEvent;
 
 import com.tutego.jrtf.Rtf;
-import com.tutego.jrtf.RtfPara;
 import com.tutego.jrtf.RtfText;
 import com.tutego.jrtf.RtfTextPara;
-
-import static com.tutego.jrtf.Rtf.rtf;
-import static com.tutego.jrtf.RtfDocfmt.*;
-import static com.tutego.jrtf.RtfHeader.*;
-import static com.tutego.jrtf.RtfInfo.*;
-import static com.tutego.jrtf.RtfFields.*;
-import static com.tutego.jrtf.RtfPara.*;
-import static com.tutego.jrtf.RtfSectionFormatAndHeaderFooter.*;
-import static com.tutego.jrtf.RtfText.*;
-import static com.tutego.jrtf.RtfUnit.*;
 
 public class RTFPrinter {
 
@@ -57,12 +50,12 @@ public class RTFPrinter {
 		return  all.toArray( new RtfTextPara[2]);
 	}
 
-//	public CharSequence printRTF(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) throws IOException {
+//	public CharSequence printRTF(ArrayList<String> header, ArrayList<ArrayList<PGNTree>> allStructured) throws IOException {
 //
 //
 //	}
 
-	public static ArrayList<RtfTextPara> getParagraphs(ArrayList<String> header, ArrayList<ArrayList<HalfMove>> allStructured) {
+	public static ArrayList<RtfTextPara> getParagraphs(ArrayList<String> header, ArrayList<ArrayList<PGNTree>> allStructured) {
 
 		ArrayList<RtfTextPara> oneGame = new ArrayList<RtfTextPara>();
 				
@@ -73,7 +66,7 @@ public class RTFPrinter {
 
 		ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
 		
-		for (ArrayList<HalfMove> cur : allStructured) {
+		for (ArrayList<PGNTree> cur : allStructured) {
 
 			for (int i = 0; i < cur.size(); i++) {
 				if (i == 0) {
@@ -84,19 +77,19 @@ public class RTFPrinter {
 					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.get(i).getNumber() + ". "))));
 				}
 
-				String halfMove = String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute());
+				String PGNTree = String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute());
 				
 				if (cur.get(i).isLastOfLevel()) {
 					if (cur.get(i).isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, halfMove)))));
+						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, PGNTree)))));
 					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, halfMove)))));
+						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, PGNTree)))));
 					}
 				} else {
 					if (cur.get(i).isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
+						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, PGNTree))));
 					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
+						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, PGNTree))));
 					}
 				}
 
@@ -115,7 +108,7 @@ public class RTFPrinter {
 		System.out.println("size is " + oneGame.size());
 		
 //		StringBuilder all = new StringBuilder();
-//		for (ArrayList<HalfMove> cur : allStructured) {
+//		for (ArrayList<PGNTree> cur : allStructured) {
 //
 //			for (int i = 0; i < cur.size(); i++) {
 //				if (i == 0) {
@@ -123,7 +116,7 @@ public class RTFPrinter {
 //					// number always here..
 //					all.append(String.format("%3s", cur.get(i).getNumber() + ". "));
 //				}
-//				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+//				all.append(String.format("%6s", cur.get(i).getPGNTree() + cur.get(i).getAttribute()) + " |");
 //
 //				// comment is always on last item of line here..
 //				if (!cur.get(i).getComment().isEmpty()) {
