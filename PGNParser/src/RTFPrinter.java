@@ -94,15 +94,15 @@ public class RTFPrinter {
 				}
 
 				// comment is always on last item of line here..
-				if (!cur.get(i).getComment().isEmpty()) {
-					ArrayList<String> allComments = cur.get(i).getStructuredComments(38);
-					for (String commentLine : allComments) {
-						oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
-						currentRTFTextLine = new ArrayList<RtfText>();
-						currentRTFTextLine.add(
-								fontSize(FONT_SIZE, font(1, color(3,"                                        " + commentLine))));
-					}
-				}
+//				if (!cur.get(i).getComment().isEmpty()) {
+//					ArrayList<String> allComments = cur.get(i).getStructuredComments(38);
+//					for (String commentLine : allComments) {
+//						oneGame.add(p(currentRTFTextLine.toArray( new RtfText[currentRTFTextLine.size()])));
+//						currentRTFTextLine = new ArrayList<RtfText>();
+//						currentRTFTextLine.add(
+//								fontSize(FONT_SIZE, font(1, color(3,"                                        " + commentLine))));
+//					}
+//				}
 			}
 		}
 		System.out.println("size is " + oneGame.size());

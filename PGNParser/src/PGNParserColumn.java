@@ -109,7 +109,8 @@ public class PGNParserColumn {
 		createMoves(tokens, root, moveNumber, level, doubleEndBrackets);
 		
 		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
-		allPGNTrees = root.toFlatList(allPGNTrees);
+		//TODO: deviation at fist child ?
+		allPGNTrees = root.getChildren().getFirst().toFlatList(allPGNTrees);
 		System.out.println("size is  " + allPGNTrees.size() );
 		
 		//sort moves
@@ -152,12 +153,12 @@ public class PGNParserColumn {
 //		}
 
 		StringBuilder all = printIt(pgnHeaderData, allStructured);
-////			Parses PGN Files and formats them into columns for better readability
+//////			Parses PGN Files and formats them into columns for better readability
 		System.out.println(all);
-//
+////
 //		System.out.println("first size is " + allStructured.size());
-//		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
-		return null;
+		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
+//		return null;
 	}
 	
 	/**
@@ -170,6 +171,7 @@ public class PGNParserColumn {
 	private static PGNTree createMoves(LinkedList<String> tokens, PGNTree root , int moveNumber, int level, boolean doubleEndBrackets) {
 		
 		PGNTree newNode = root;
+		PGNTree oldRoot;
 
 		for (String token : tokens) {
 			if (token.startsWith("{")) {
@@ -200,12 +202,20 @@ public class PGNParserColumn {
 				}
 
 				// next same move number but new level
-				newNode = createMoves(tokenize(newLevel), root, moveNumber - 1, level + 1, doubleEndBrackets);
+				
+				oldRoot = root;
+				// if () here next Node is not child of this root but of its parent... sibling of this root
+				createMoves(tokenize(newLevel), root.getParent(), moveNumber - 1, level + 1, doubleEndBrackets);
+				// root should remain the same as before...
+				root = oldRoot;
 
 			} else {
 				// only increase move number if it is a move
 				System.out.println("old" + newNode);
-				newNode = newNode.createChildNode(moveNumber / 2, (moveNumber % 2 == 0 ? true : false), token, level, "");
+				newNode = PGNTree.createChildNode(root, moveNumber / 2, (moveNumber % 2 == 0 ? true : false), token, level, "");
+				//normally root becomes the new node to link at
+				root = newNode;
+				
 				System.out.println("new" + newNode);
 				moveNumber++;
 			}
@@ -236,12 +246,15 @@ public class PGNParserColumn {
 		for (ArrayList<PGNTree> cur : allStructured) {
 
 			for (int i = 0; i < cur.size(); i++) {
-//				if (i == 0) {
+				if (i == 0) {
 					all.append(LINE_SEPARATOR);
 					// number always here..
-					all.append(String.format("%4s", cur.get(i).getPosition() + ". "));
-//				}
-				all.append(String.format("%6s", cur.get(i).getHalfMove() + cur.get(i).getAttribute()) + " |");
+				all.append(String.format("%4s", cur.get(i).getNumber()));
+				}
+				
+				//all.append(String.format("%4s", cur.get(i).getIndex()));
+
+				all.append(String.format("%6s", cur.get(i).getHalfMove() + "/" + cur.get(i).getParent().getHalfMove() + cur.get(i).getAttribute()) + " |");
 
 				// comment is always on last item of line here..
 //				if (!cur.get(i).getComment().isEmpty()) {
@@ -266,17 +279,17 @@ public class PGNParserColumn {
 		ArrayList<ArrayList<PGNTree>> allStructured = new ArrayList<ArrayList<PGNTree>>();
 		ArrayList<PGNTree> currentLine = new ArrayList<PGNTree>();
 		
-		int previousNumber = -1;
+		int previousHalfMoveNumber = -1;
 		for (PGNTree half : allPGNTrees) {
 			
 			// line completed
-			if (half.getNumber() != previousNumber) {
+			if (half.getHalfMoveNumber() != previousHalfMoveNumber) {
 				allStructured.add(currentLine);
 				currentLine = new ArrayList<PGNTree>();
 			}
 			currentLine.add(half);
 			
-			previousNumber = half.getNumber();
+			previousHalfMoveNumber = half.getHalfMoveNumber();
 		}
 
 		//currentLine.add(new PGNTree(0, currentLine.size() % 2 == 0, "end", 0, "end"));

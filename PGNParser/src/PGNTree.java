@@ -4,7 +4,13 @@ import java.util.Objects;
 
 public class PGNTree implements Comparable<PGNTree>{
 
+	/**
+	 * who am I = way to get here..
+	 */
+	public String index = "";
+	
 	public PGNTree parent = null;
+
 
 	/**
 	 * all child nodes are put here, if the games continues with no variation this
@@ -27,6 +33,8 @@ public class PGNTree implements Comparable<PGNTree>{
 	
 	Boolean lastOfLevel = false;
 	
+	
+	
 	private PGNTree(Integer number, Boolean whitheOrBlack, String halfMove, Integer level, String comment) {
 		this.number = number;
 		this.white = whitheOrBlack;
@@ -35,14 +43,16 @@ public class PGNTree implements Comparable<PGNTree>{
 		this.comment = comment;
 	}
 	
-	public PGNTree createChildNode(Integer number, Boolean whitheOrBlack, String halfMove, Integer level,
+	public static PGNTree createChildNode(PGNTree parent, Integer number, Boolean whitheOrBlack, String halfMove, Integer level,
 			String comment) {
 		
 
 		PGNTree newNode = new PGNTree(number, whitheOrBlack, halfMove, level, comment);
-		newNode.setParent(this);
+		newNode.setParent(parent);
 		
-		this.children.add(newNode);
+		parent.children.add(newNode);
+		
+		newNode.setIndex(parent.getIndex() + (parent.children.size()-1));
 
 		return newNode;
 
@@ -61,6 +71,11 @@ public class PGNTree implements Comparable<PGNTree>{
 		} else {
 			return 0;
 		}
+	}
+	
+	
+	public int getHalfMoveNumber() {
+		return ((this.number-1) * 2) + (this.isWhite() ? 0 : 1);
 	}
 	
 	/**
@@ -253,23 +268,32 @@ public class PGNTree implements Comparable<PGNTree>{
 	@Override
 	public int compareTo(PGNTree o) {
 
-		Integer numberCompare = Integer.valueOf(this.getNumber()).compareTo(Integer.valueOf(o.getNumber()));
-		Integer numberParentCompare = Integer.valueOf(this.getParentNumber())
-				.compareTo(Integer.valueOf(o.getParentNumber()));
-		Integer columnCompare = Integer.valueOf(this.getColumn()).compareTo(Integer.valueOf(o.getColumn()));
+		Integer halfMoveCompare = Integer.valueOf(this.getHalfMoveNumber())
+				.compareTo(Integer.valueOf(o.getHalfMoveNumber()));
 
-		if (0 != numberCompare) {
-			return numberCompare;
-		} else if (0 != numberParentCompare) {
-			return numberParentCompare;
+		if (0 != halfMoveCompare) {
+			return halfMoveCompare;
 		} else {
-			return columnCompare;
+
+			if (this.getIndex().length() < o.getIndex().length()) {
+				return -1;
+			} else if (this.getIndex().length() > o.getIndex().length()) {
+				return 1;
+			} else {
+				// same index length, compare lexical
+				return this.getIndex().compareTo(o.getIndex());
+			}
+
 		}
 	}
 	
-	public String getPosition() {
-		return getNumber() + "." + getParentNumber() + "." + getColumn(); 
-	}
+//	/**
+//	 * 
+//	 * @return
+//	 */
+//	public String getPosition() {
+//		return getNumber() + "." + getParentNumber() + "." + getColumn(); 
+//	}
 
 	
 	/**
@@ -300,6 +324,20 @@ public class PGNTree implements Comparable<PGNTree>{
 		all.add(commentLine.toString());
 		
 		return all;
+	}
+
+	/**
+	 * @return the index
+	 */
+	public String getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(String index) {
+		this.index = index;
 	}
 
 
