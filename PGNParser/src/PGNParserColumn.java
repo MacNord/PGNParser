@@ -108,6 +108,14 @@ public class PGNParserColumn {
 		PGNTree root = PGNTree.createRootNode();
 		createMoves(tokens, root, moveNumber, level, doubleEndBrackets);
 		
+		int x = root.maxWith(root);
+		int y = root.maxDepth(root);
+		System.out.println("maxWith " + x);
+		System.out.println("maxDepth  " + y);
+		
+		PGNTree[][] pgnMatrix = new PGNTree[x][y];
+		
+		
 		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
 		//TODO: deviation at fist child ?
 		allPGNTrees = root.getChildren().getFirst().toFlatList(allPGNTrees);

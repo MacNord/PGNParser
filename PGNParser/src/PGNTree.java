@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -112,6 +113,77 @@ public class PGNTree implements Comparable<PGNTree>{
 		}
 		return toFlat;
 	}
+	
+	
+	/**
+	 * 
+	 * @param root
+	 * @return
+	 */
+	public int maxWith(PGNTree root) {
+		
+		int currentWith = 0;
+		for (int i = 0; i < root.getChildren().size(); i++) {
+			PGNTree child = root.getChildren().get(i);
+			currentWith += (i + child.maxWith(child));
+		}
+		return currentWith;
+	}
+	
+	/**
+	 * 
+	 * @param root
+	 * @param dept
+	 * @return
+	 */
+	
+	public int maxDepth(PGNTree root) {
+		
+		if (root == null || root.getChildren().isEmpty()) {
+			return 0;
+		} else {
+			int currentDept = 0;
+			for (int i = 0; i < root.getChildren().size(); i++) {
+				PGNTree child = root.getChildren().get(i);
+				currentDept = Math.max(currentDept, child.maxDepth(child));
+			}
+			return currentDept+1;
+		}
+	}
+	
+	
+	
+	public boolean fillMatrix(PGNTree root, PGNTree[][] pgnMatrix, int x, int y) {
+
+		boolean returnValue = false;
+		
+		if (root != null && !root.getChildren().isEmpty()) {
+			for (int i = 0; i < root.getChildren().size(); i++) {
+				PGNTree child = root.getChildren().get(i);
+				returnValue = child.fillMatrix(child, pgnMatrix, x + i, y + 1);
+				
+				while (!returnValue) {
+					// remove last filled somehow or make a copy of matrix before filling
+					child.fillMatrix(child, pgnMatrix, x + i + 1, y + 1);
+				}
+				
+				// on the way up try to fill
+				if (pgnMatrix[x][y] == null) {
+					pgnMatrix[x][y] = child;
+					returnValue = returnValue && true;
+				}
+				
+				return returnValue;
+
+			}
+		}
+		return true;
+
+	}
+	
+	
+	
+	
 
 	public PGNTree getParent() {
 		return parent;
