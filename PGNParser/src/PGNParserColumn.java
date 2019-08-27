@@ -13,7 +13,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,7 +115,13 @@ public class PGNParserColumn {
 		System.out.println("maxWith " + x);
 		System.out.println("maxDepth  " + y);
 		
-		PGNTree[][] pgnMatrix = new PGNTree[x][y];
+
+		TreeMap<Location, PGNTree> locations = new TreeMap<Location, PGNTree>();
+		root.fillMatrix(root, locations, 0, 0);
+		for (Location loc : locations.keySet()) {
+			System.out.println(loc.toString() + locations.get(loc).toString());
+		}
+		
 		
 		
 		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
@@ -125,7 +133,7 @@ public class PGNParserColumn {
 		Collections.sort(allPGNTrees);
 		System.out.println("sorted");
 		
-		System.out.println(Arrays.toString(allPGNTrees.toArray()));
+//		System.out.println(Arrays.toString(allPGNTrees.toArray()));
 		
 		ArrayList<ArrayList<PGNTree>> allStructured = createLines(allPGNTrees);
 

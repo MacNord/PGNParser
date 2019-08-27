@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class PGNTree implements Comparable<PGNTree>{
 
@@ -153,30 +156,34 @@ public class PGNTree implements Comparable<PGNTree>{
 	
 	
 	
-	public boolean fillMatrix(PGNTree root, PGNTree[][] pgnMatrix, int x, int y) {
-
-		boolean returnValue = false;
+	public boolean fillMatrix(PGNTree root, TreeMap<Location, PGNTree> locations, int x, int y) {
 		
-		if (root != null && !root.getChildren().isEmpty()) {
-			for (int i = 0; i < root.getChildren().size(); i++) {
+		boolean childTreeWorked = false;
+		
+		for (int i = 0; i < root.getChildren().size(); i++) {
+				
 				PGNTree child = root.getChildren().get(i);
-				returnValue = child.fillMatrix(child, pgnMatrix, x + i, y + 1);
-				
-				while (!returnValue) {
-					// remove last filled somehow or make a copy of matrix before filling
-					child.fillMatrix(child, pgnMatrix, x + i + 1, y + 1);
-				}
-				
-				// on the way up try to fill
-				if (pgnMatrix[x][y] == null) {
-					pgnMatrix[x][y] = child;
-					returnValue = returnValue && true;
-				}
-				
-				return returnValue;
 
+				Location loc = new Location(x + i, y);
+
+				PGNTree previous = locations.put(loc, child);
+				if (previous != null) {
+					// not ok already existed
+					locations.put(loc, null);
+					return false;
+				}
+				
+				// one level down
+				childTreeWorked = child.fillMatrix(child, locations, x + i, y + 1);
+				
+				int j = 0;
+				while (!childTreeWorked) {
+					j++;
+					// move x more until it works...
+					System.out.println("Trying with location x " + (x + i + j) + " y " + (y + 1));
+					childTreeWorked = child.fillMatrix(child, locations, x + i + j, y + 1);
+				}
 			}
-		}
 		return true;
 
 	}
