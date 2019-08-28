@@ -1,23 +1,21 @@
-[Event "IQP, Qh4, d5 break"]
-[Site "?"]
+[Event "e4 e5"]
+[Site "https://www.chess.com/a/2AeFY5Vok5Gdc"]
 [Date "????.??.??"]
 [Round "?"]
-[White "Nick"]
-[Black "?"]
+[White "e4"]
+[Black "aim to play d4"]
 [Result "*"]
 
-1. d4 d5 2. c4 dxc4 3. e3 Nf6 4. Bxc4 e6 5. Nf3 c5 6. O-O a6 7. Bb3 cxd4 8. exd4
-{this is the structure we are aiming for, IQP, attack on h7 eg. Qd3, Bc2, make
-him play g6 or h6 to create another target !} 8... Nc6 9. Nc3 Be7 10. Bg5 {best
-square for the bishop} 10... O-O {want to attack on h7, Q wants to go to h4
-combined with Bc2} 11. Qd2 Na5 {dont loose the bishop !} 12. Bc2 b5 13. Qf4 Bb7
-14. Qh4 h6 (14... g6 {weakens dark squares} 15. d5 {second thing to remember,
-the d5 break, pawn sacrifice.. calculate it, why? put Rook on d1, opens e file}
-15... Nxd5 (15... exd5 16. Rfe1! {followed by Rxe7 and Bxf6, only works if g6
-was played} 16... Re8 17. Rxe7 Qxe7 18. Bxf6) (15... Bxd5 16. Ne4 Bxe4 17. Bxe4
-Ra7 18. Rad1 Nd5 19. Rfe1 {threatheing Bxd5 and Rxe7} 19... f6 20. Bh6 Re8 21.
-Qg4 {look at ways to bust through backs position eg. Qxe6 or Bxg6} 21... f5
-(21... Bf8 22. Bxg6 hxg6 23. Qxg6+ Bg7 24. Rxd5 Qxd5 25. Qxe8+ Bf8 (25... Kh7
-26. Bxg7 Rxg7 27. Re3)) 22. Bxf5 exf5 23. Qd4) 16. Nxd5 Bxg5 17. Nxg5) 15. Bxh6!
-{rip open king} 15... gxh6 16. Qxh6 {need to have 2 or more attacking than
-defending pices.. here we have 3 attackers (incl. Nf3) and 1 defender} *
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 {aiming to play d4} (3... Bc5 {only here isolated
+pawn other variations not} 4. c3 Nf6 {prepares d4} 5. d4 exd4 6. cxd4 Bb4+ 7.
+Nbd2 Nxe4 (7... d5 {Kramnik} 8. exd5 Nxd5 9. O-O O-O 10. a3 Bxd2 11. Bxd2 Bg4
+{if Bg4, go for b7 now} 12. h3 Bh5 13. g4 Bg6 14. Re1 Qd6 15. Qb3 {min. 25,
+slightly different position since pawn is on c7 not e7 like in last chapter so
+new plan attack b7, d5, Ne5, Rd1 and use your Bishops}) 8. d5 {cant allow black
+to play d5} 8... Ne7 9. O-O Nxd2 (9... Bxd2 10. Nxd2 Nxd2 11. Bxd2 d6 12. Re1
+O-O 13. Qh5) 10. Bxd2 Bxd2 11. d6 cxd6 12. Qxd2 O-O (12... d5 13. Bxd5 O-O 14.
+Rad1 {one pawn down but better possition}) 13. Qxd6) 4. d4 exd4 5. e5 {Rip your
+opponent apart :)} 5... Ne4 (5... d5 {common} 6. Bb5 Ne4 7. Nxd4 Bd7 8. Bxc6
+bxc6 9. O-O Bc5 10. f3 Ng5 {king side pawn storm}) 6. Qe2 Nc5 (6... Bb4+ 7. Kf1
+d5 8. exd6 f5 9. Nbd2 Bxd2 10. Nxd2 Qxd6 11. Nxe4 fxe4 12. Qxe4+ Qe5 13. Qxe5+
+Nxe5 14. Bb3) 7. O-O Be7 8. c3 {gambit style} 8... dxc3 9. Nxc3 O-O 10. Rd1 *

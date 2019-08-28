@@ -116,66 +116,60 @@ public class PGNParserColumn {
 		System.out.println("maxDepth  " + y);
 		
 
-		TreeMap<Location, PGNTree> locations = new TreeMap<Location, PGNTree>();
-		root.fillMatrix(root, locations, 0, 0);
-		for (Location loc : locations.keySet()) {
-			System.out.println(loc.toString() + locations.get(loc).toString());
-		}
-		
-		
+		TreeMap<Location, PGNTree> tree = new TreeMap<Location, PGNTree>();
+		root.fillMatrix(root, tree, 0, 0);
+//		for (Location loc : locations.keySet()) {
+//			System.out.println(loc.toString() + locations.get(loc).toString());
+//		}
 		
 		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
 		//TODO: deviation at fist child ?
 		allPGNTrees = root.getChildren().getFirst().toFlatList(allPGNTrees);
 		System.out.println("size is  " + allPGNTrees.size() );
-		
 		//sort moves
 		Collections.sort(allPGNTrees);
 		System.out.println("sorted");
 		
-//		System.out.println(Arrays.toString(allPGNTrees.toArray()));
-		
-		ArrayList<ArrayList<PGNTree>> allStructured = createLines(allPGNTrees);
-
-//		for (int i = 0; i < allPGNTrees.size() - 1; i++) {
-//
-//			PGNTree currentA = allPGNTrees.get(i);
-//			PGNTree nextA = allPGNTrees.get(i + 1);
-//			
-//			LinkedList<PGNTree> toInsert = insertsBefore(currentA, nextA);
-//
-//			allPGNTrees.addAll(i + 1, toInsert);
-//
-//			if (currentA.isWhite() && (currentA.getColumn() + 1 != nextA.getColumn() || (currentA.getNumber() != nextA.getNumber()))) {
-//				// no black move for this white move
-//				allPGNTrees.add(i + 1, new PGNTree(currentA.getNumber(), false, ".", currentA.getLevel(), ""));
-//				//currentA.setLastOfLevel(true);
-//			}
-//		}
-//
 //		ArrayList<ArrayList<PGNTree>> allStructured = createdStrucuted(allPGNTrees);
-//
-//		for (ArrayList<PGNTree> cur : allStructured) {
-//			StringBuilder previousCommentsOfLine = new StringBuilder();
-//			for (int i = 0; i < cur.size(); i++) {
-//				if (i < cur.size() - 1) {
-//					previousCommentsOfLine.append(cur.get(i).getComment());
-//					cur.get(i).setComment("");
-//				} else {
-////						add it
-//					cur.get(i).setComment(previousCommentsOfLine.toString() + cur.get(i).getComment());
-//				}
-//			}
-//		}
 
-		StringBuilder all = printIt(pgnHeaderData, allStructured);
-//////			Parses PGN Files and formats them into columns for better readability
+		StringBuilder all = printIt(pgnHeaderData, tree);
 		System.out.println(all);
 ////
 //		System.out.println("first size is " + allStructured.size());
-		return RTFPrinter.getParagraphs(pgnHeaderData, allStructured);
-//		return null;
+		return RTFPrinter.getParagraphs(pgnHeaderData, tree);
 	}
+	
+	public StringBuilder printIt(ArrayList<String> header, TreeMap<Location, PGNTree> tree) {
+
+		StringBuilder all = new StringBuilder();
+		int line = -1;
+		int posInLine = 0;
+		for (Location loc : tree.keySet()) {
+			PGNTree cur = tree.get(loc);
+
+			if (cur != null) {
+
+				if (line != loc.getY()) {
+					// new line
+					all.append(LINE_SEPARATOR);
+					// number always here..
+					all.append(String.format("%4s", cur.getNumber()));
+					posInLine = 0;
+				}
+
+				while (posInLine < loc.getX()) {
+					all.append(String.format("%6s", " _ "));
+					posInLine++;
+				}
+				all.append(String.format("%6s", cur.getHalfMove() + cur.getAttribute()));
+				posInLine++;
+
+				line = loc.getY();
+			}
+		}
+		return all;
+	}
+
 	
 	/**
 	 * 
