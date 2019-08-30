@@ -52,6 +52,8 @@ public class RTFPrinter {
 		}
 
 		ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
+		ArrayList<RtfText> currentComment = new ArrayList<RtfText>();
+		ArrayList<ArrayList<RtfText>> allCommentsOfLine = new ArrayList<ArrayList<RtfText>>();
 
 		int line = -1;
 		int posInLine = 0;
@@ -64,14 +66,24 @@ public class RTFPrinter {
 				if (line != loc.getY()) {
 					// add line to game
 					oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
-
+					for (ArrayList<RtfText> comLine : allCommentsOfLine) {
+						oneGame.add(p(comLine.toArray(new RtfText[comLine.size()])));
+					}
+					
+					// init fresh
 					currentRTFTextLine = new ArrayList<RtfText>();
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.getNumber() + ". "))));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.getNumber() + "."))));
+					
+					allCommentsOfLine = new ArrayList<ArrayList<RtfText>>();
+					currentComment = new ArrayList<RtfText>();
+					currentComment.add(fontSize(FONT_SIZE, font(1, String.format("%4s", ""))));
+					
 					posInLine = 0;
 				}
 
 				while (posInLine < loc.getX()) {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, String.format("%6s", " _ ")));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, String.format("%6s", "_")));
+					currentComment.add(fontSize(FONT_SIZE, String.format("%6s", "")));
 					posInLine++;
 				}
 
@@ -89,6 +101,23 @@ public class RTFPrinter {
 					} else {
 						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
 					}
+				}
+				
+				if (!cur.getComment().isEmpty()) {
+					String comment = "  " + cur.getComment();
+					currentComment.add(fontSize(FONT_SIZE, font(1, color(3, comment))));
+					allCommentsOfLine.add(currentComment);
+					//copy for right positon to start with
+					ArrayList<RtfText> currentCommentNew = new ArrayList<RtfText>();
+					currentCommentNew.add(fontSize(FONT_SIZE, String.format("%4s", "")));
+					for (int i = 1; i < currentComment.size(); i++) {
+						currentCommentNew.add(fontSize(FONT_SIZE, String.format("%6s", "")));
+					}
+					currentComment = currentCommentNew;
+					
+					
+				} else {
+					currentComment.add(fontSize(FONT_SIZE, String.format("%6s", "")));
 				}
 
 				posInLine++;

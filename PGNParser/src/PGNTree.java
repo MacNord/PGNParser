@@ -357,7 +357,7 @@ public class PGNTree implements Comparable<PGNTree>{
 	 * @return the comment
 	 */
 	public String getComment() {
-		return comment;
+		return this.comment.replace("{", " ").replace("}", " ");
 	}
 
 
