@@ -11,7 +11,7 @@ public class PGNTree implements Comparable<PGNTree>{
 	/**
 	 * who am I = way to get here..
 	 */
-	public String index = "";
+	public String path = "";
 	
 	public PGNTree parent = null;
 
@@ -37,6 +37,8 @@ public class PGNTree implements Comparable<PGNTree>{
 	
 	Boolean lastOfLevel = false;
 	
+	Boolean begin = false;
+	
 	
 	
 	private PGNTree(Integer number, Boolean whitheOrBlack, String halfMove, Integer level, String comment) {
@@ -56,14 +58,21 @@ public class PGNTree implements Comparable<PGNTree>{
 		
 		parent.children.add(newNode);
 		
-		newNode.setIndex(parent.getIndex() + (parent.children.size()-1));
+		newNode.setPath(parent.getPath() + (parent.children.size()-1));
 
 		return newNode;
 
 	}
 	
+
 	public static PGNTree createRootNode() {
 		PGNTree newNode = new PGNTree(0, true, ".", 0, "I am root!");
+		return newNode;
+	}
+	
+	public static PGNTree createOnlyChildRoot(PGNTree onlyChild) {
+		PGNTree newNode = new PGNTree(0, true, ".", 0, "I am root!");
+		newNode.children.add(onlyChild);
 		return newNode;
 	}
 	
@@ -154,40 +163,72 @@ public class PGNTree implements Comparable<PGNTree>{
 		}
 	}
 	
-	
-	
-	public boolean fillMatrix(PGNTree root, TreeMap<Location, PGNTree> locations, int x, int y) {
-		
-		boolean childTreeWorked = false;
-		
+	public String fillMatrix(PGNTree root, TreeMap<Location, PGNTree> locations, int x, int y) {
+
+		String childTreeWorkedWhenEmpty = "-";
+
 		for (int i = 0; i < root.getChildren().size(); i++) {
-				
-				PGNTree child = root.getChildren().get(i);
 
-				Location loc = new Location(x + i, y);
+			PGNTree child = root.getChildren().get(i);
+			
+			Location loc = new Location(x + i, y);
 
-				PGNTree previous = locations.put(loc, child);
-				if (previous != null) {
-					// not ok already existed
-					locations.put(loc, null);
-					return false;
+			PGNTree existing = locations.get(loc); 
+
+			if (existing == null) {
+				locations.put(loc, child);
+				System.out.println("puting on loc " + loc + " " + child);
+			} else {
+				// not ok already existed
+				// must be for the whole tree until variation... also parts that where ok..
+
+				System.out.println("child.getPath() " + child.getPath());
+				StringBuilder reversedBuilder = new StringBuilder(child.getPath());
+				String reversed = reversedBuilder.reverse().toString();
+				// cut off 0
+				while (reversed.startsWith("0")) {
+					reversed = reversed.substring(1, reversed.length());
 				}
-				
-				// one level down
-				childTreeWorked = child.fillMatrix(child, locations, x + i, y + 1);
-				
-				int j = 0;
-				while (!childTreeWorked) {
-					j++;
-					// move x more until it works...
-					System.out.println("Trying with location x " + (x + i + j) + " y " + (y + 1));
-					childTreeWorked = child.fillMatrix(child, locations, x + i + j, y + 1);
+				StringBuilder stemBuilder = new StringBuilder(reversed);
+				String stem = stemBuilder.reverse().toString();
+				System.out.println("stem " + stem);
+
+				return stem;
+			}
+
+			// one level down
+			childTreeWorkedWhenEmpty = child.fillMatrix(child, locations, x + i, y + 1);
+
+			if (!childTreeWorkedWhenEmpty.isEmpty()) {
+				if (child.getPath().equals(childTreeWorkedWhenEmpty)) {
+					System.out.println("root found " + childTreeWorkedWhenEmpty);
+					// thats the root to move
+					// top of failed variation reached, try again from here
+					locations.remove(loc);
+					System.out.println("removing from loc " + loc);
+					
+					int j = 0;
+					while (!childTreeWorkedWhenEmpty.isEmpty()) {
+						j++;
+						// move x more until it works...
+						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
+						
+						childTreeWorkedWhenEmpty = child.fillMatrix(PGNTree.createOnlyChildRoot(child), locations, x + i + j, y);
+					}
+
+					return childTreeWorkedWhenEmpty;
+				} else if (child.getPath().startsWith(childTreeWorkedWhenEmpty)) {
+					System.out.println("comparing " + child.getPath() + " and " + childTreeWorkedWhenEmpty);
+					// is a variation, propagate for the whole sub variation..
+					locations.remove(loc);
+					System.out.println("removing from loc " + loc);
+					return childTreeWorkedWhenEmpty;
 				}
 			}
-		return true;
 
+		}
+		return "";
 	}
-	
 	
 	
 	
@@ -354,13 +395,13 @@ public class PGNTree implements Comparable<PGNTree>{
 			return halfMoveCompare;
 		} else {
 
-			if (this.getIndex().length() < o.getIndex().length()) {
+			if (this.getPath().length() < o.getPath().length()) {
 				return -1;
-			} else if (this.getIndex().length() > o.getIndex().length()) {
+			} else if (this.getPath().length() > o.getPath().length()) {
 				return 1;
 			} else {
 				// same index length, compare lexical
-				return this.getIndex().compareTo(o.getIndex());
+				return this.getPath().compareTo(o.getPath());
 			}
 
 		}
@@ -406,17 +447,17 @@ public class PGNTree implements Comparable<PGNTree>{
 	}
 
 	/**
-	 * @return the index
+	 * @return the path
 	 */
-	public String getIndex() {
-		return index;
+	public String getPath() {
+		return path;
 	}
 
 	/**
-	 * @param index the index to set
+	 * @param path the path to set
 	 */
-	public void setIndex(String index) {
-		this.index = index;
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 
