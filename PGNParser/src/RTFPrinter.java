@@ -52,11 +52,21 @@ public class RTFPrinter {
 		}
 
 		ArrayList<RtfText> currentRTFTextLine = new ArrayList<RtfText>();
-		ArrayList<RtfText> currentComment = new ArrayList<RtfText>();
+		
 		ArrayList<ArrayList<RtfText>> allCommentsOfLine = new ArrayList<ArrayList<RtfText>>();
+		
+		ArrayList<RtfText> currentComment = new ArrayList<RtfText>();
+		currentComment.add(fontSize(FONT_SIZE, font(1, "Comments: ")));
+		allCommentsOfLine.add(currentComment);
+		currentComment = new ArrayList<RtfText>();
+		
+		
 
 		int line = -1;
 		int posInLine = 0;
+		RtfText halfM = null;
+		RtfText lineNumber = null;
+		
 		for (Location loc : tree.keySet()) {
 
 			PGNTree cur = tree.get(loc);
@@ -66,59 +76,56 @@ public class RTFPrinter {
 				if (line != loc.getY()) {
 					// add line to game
 					oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
-					for (ArrayList<RtfText> comLine : allCommentsOfLine) {
-						oneGame.add(p(comLine.toArray(new RtfText[comLine.size()])));
-					}
 					
 					// init fresh
 					currentRTFTextLine = new ArrayList<RtfText>();
-					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, String.format("%4s", cur.getNumber() + "."))));
 					
-					allCommentsOfLine = new ArrayList<ArrayList<RtfText>>();
-					currentComment = new ArrayList<RtfText>();
-					currentComment.add(fontSize(FONT_SIZE, font(1, String.format("%4s", ""))));
 					
+					lineNumber = fontSize(FONT_SIZE, font(1, String.format("%4s", cur.getNumber() + ".")));
+					
+					currentRTFTextLine.add(lineNumber);
 					posInLine = 0;
 				}
 
 				while (posInLine < loc.getX()) {
-					currentRTFTextLine.add(fontSize(FONT_SIZE, String.format("%6s", "_")));
-					currentComment.add(fontSize(FONT_SIZE, String.format("%6s", "")));
+					currentRTFTextLine.add(fontSize(FONT_SIZE, String.format("%6s", "_") + " "));
 					posInLine++;
 				}
 
 				String halfMove = String.format("%6s", cur.getHalfMove() + cur.getAttribute());
 
+
 				if (cur.isLastOfLevel()) {
 					if (cur.isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(1, halfMove)))));
+						halfM = fontSize(FONT_SIZE, bold(font(1, color(1, halfMove))));
 					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, bold(font(1, color(2, halfMove)))));
+						halfM = fontSize(FONT_SIZE, bold(font(1, color(2, halfMove))));
 					}
 				} else {
 					if (cur.isWhite()) {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(1, halfMove))));
+						halfM = fontSize(FONT_SIZE, font(1, color(1, halfMove)));
 					} else {
-						currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(2, halfMove))));
+						halfM = fontSize(FONT_SIZE, font(1, color(2, halfMove)));
 					}
 				}
 				
+				
 				if (!cur.getComment().isEmpty()) {
-					String comment = "  " + cur.getComment();
-					currentComment.add(fontSize(FONT_SIZE, font(1, color(3, comment))));
+					
+					currentComment.add(lineNumber);
+					currentComment.add(halfM);
+					currentComment.add(fontSize(FONT_SIZE, font(1, color(3,  ":" + cur.getComment()))));
 					allCommentsOfLine.add(currentComment);
-					//copy for right positon to start with
-					ArrayList<RtfText> currentCommentNew = new ArrayList<RtfText>();
-					currentCommentNew.add(fontSize(FONT_SIZE, String.format("%4s", "")));
-					for (int i = 1; i < currentComment.size(); i++) {
-						currentCommentNew.add(fontSize(FONT_SIZE, String.format("%6s", "")));
-					}
-					currentComment = currentCommentNew;
+					currentComment = new ArrayList<RtfText>();
 					
-					
+					currentRTFTextLine.add(halfM);
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(3,  "*"))));
 				} else {
-					currentComment.add(fontSize(FONT_SIZE, String.format("%6s", "")));
+					currentRTFTextLine.add(halfM);
+					//no comment
+					currentRTFTextLine.add(fontSize(FONT_SIZE, font(1, color(3,  " "))));
 				}
+				
 
 				posInLine++;
 
@@ -127,6 +134,11 @@ public class RTFPrinter {
 		}
 		// add last line
 		oneGame.add(p(currentRTFTextLine.toArray(new RtfText[currentRTFTextLine.size()])));
+		allCommentsOfLine.add(currentComment);
+		
+		for (ArrayList<RtfText> comLine : allCommentsOfLine) {
+			oneGame.add(p(comLine.toArray(new RtfText[comLine.size()])));
+		}
 
 		System.out.println("size is " + oneGame.size());
 

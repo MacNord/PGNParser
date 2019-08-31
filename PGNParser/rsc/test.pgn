@@ -6,17 +6,20 @@
 [Black "?"]
 [Result "*"]
 
-1. e4 e5 2. Nf3 Nc6 (2... b5 3. a3) 3. Bc4 Nf6 {aiming to play d4} (3... Bc5
-{only here isolated pawn other variations not} 4. c3 Nf6 {prepares d4} 5. d4
-exd4 6. cxd4 Bb4+ 7. Nbd2 Nxe4 (7... d5 {Kramnik} 8. exd5 Nxd5 9. O-O O-O 10. a3
-Bxd2 11. Bxd2 Bg4 {if Bg4, go for b7 now} 12. h3 Bh5 13. g4 Bg6 14. Re1 Qd6 15.
-Qb3 {min. 25, slightly different position since pawn is on c7 not e7 like in
-last chapter so new plan attack b7, d5, Ne5, Rd1 and use your Bishops}) 8. d5
-{cant allow black to play d5} 8... Ne7 9. O-O Nxd2 (9... Bxd2 10. Nxd2 Nxd2 11.
-Bxd2 d6 12. Re1 O-O 13. Qh5) 10. Bxd2 Bxd2 11. d6 cxd6 12. Qxd2 O-O (12... d5
-13. Bxd5 O-O 14. Rad1 {one pawn down but better possition}) 13. Qxd6) 4. d4 exd4
-5. e5 {Rip your opponent apart :)} 5... Ne4 (5... d5 {common} 6. Bb5 Ne4 7. Nxd4
-Bd7 8. Bxc6 bxc6 9. O-O Bc5 10. f3 Ng5 {king side pawn storm}) 6. Qe2 Nc5 (6...
-Bb4+ 7. Kf1 d5 8. exd6 f5 9. Nbd2 Bxd2 10. Nxd2 Qxd6 11. Nxe4 fxe4 12. Qxe4+ Qe5
-13. Qxe5+ Nxe5 14. Bb3) 7. O-O Be7 8. c3 {gambit style} 8... dxc3 9. Nxc3 O-O
-10. Rd1 *
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 {aiming to play d4} (3... Bc5 {only here isolated
+pawn other variations not} 4. c3 Nf6 {prepares d4} 5. d4 exd4 6. cxd4 Bb4+ 7.
+Nbd2 Nxe4 (7... d5 {Kramnik} 8. exd5 Nxd5 9. O-O O-O 10. a3 Bxd2 11. Bxd2 Bg4
+{if Bg4, go for b7 now} 12. h3 Bh5 13. g4 Bg6 14. Re1 Qd6 15. Qb3 {min. 25,
+slightly different position since pawn is on c7 not e7 like in last chapter so
+new plan attack b7, d5, Ne5, Rd1 and use your Bishops}) 8. d5 {cant allow black
+to play d5} 8... Ne7 9. O-O Nxd2 (9... Bxd2 10. Nxd2 Nxd2 11. Bxd2 d6 12. Re1
+O-O 13. Qh5) 10. Bxd2 Bxd2 11. d6 cxd6 12. Qxd2 O-O (12... d5 13. Bxd5 O-O 14.
+Rad1 {one pawn down but better possition}) 13. Qxd6) 4. d4 exd4 5. e5 {Rip your
+opponent apart :)} 5... Ne4 (5... d5 {common} 6. Bb5 Ne4 7. Nxd4 Bd7 8. Bxc6
+bxc6 9. O-O Bc5 10. f3 Ng5 {king side pawn storm}) (5... Ng4 6. O-O Be7 7. Re1
+d6 8. exd6 cxd6 9. Nxd4 (9. Bd5 O-O 10. c3 dxc3 11. Nxc3 Nge5 (11... Nf6 12. Bb3
+h6) 12. Bf4) 9... O-O 10. Bd5 Nxd4 11. Qxd4) 6. Qe2 Nc5 (6... Bb4+ 7. Kf1 d5 8.
+exd6 f5 9. Nbd2 Bxd2 10. Nxd2 Qxd6 11. Nxe4 fxe4 12. Qxe4+ Qe5 13. Qxe5+ Nxe5
+14. Bb3) 7. O-O Be7 8. c3 {gambit style} 8... dxc3 9. Nxc3 O-O 10. Rd1 {Game may have continued...} (10. Rd1 b6 11. Be3 a5 12. Bxc5
+bxc5 13. Qe4 Rb8 14. Rd2 Qe8 15. Nd5 Bd8 16. Qf4 Ne7 17. Nxe7+ Qxe7 18. Rad1 Re8
+19. Qg3 Rb6 20. h4 h6 21. Bb3 c6 22. Qg4) *

@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -6,15 +9,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class PGNTree implements Comparable<PGNTree>{
+import javax.swing.event.ListSelectionEvent;
+
+public class PGNTree implements Comparable<PGNTree> {
 
 	/**
 	 * who am I = way to get here..
 	 */
 	public String path = "";
-	
-	public PGNTree parent = null;
 
+	public PGNTree parent = null;
 
 	/**
 	 * all child nodes are put here, if the games continues with no variation this
@@ -22,25 +26,23 @@ public class PGNTree implements Comparable<PGNTree>{
 	 * loved :)
 	 */
 	public LinkedList<PGNTree> children = new LinkedList<PGNTree>();
-	
+
 	private Integer number;
-	
+
 	private Boolean white;
-	
+
 	private String halfMove;
-	
+
 	private Integer level;
-	
+
 	private String attribute = "";
-	
+
 	private String comment = "";
-	
+
 	Boolean lastOfLevel = false;
-	
+
 	Boolean begin = false;
-	
-	
-	
+
 	private PGNTree(Integer number, Boolean whitheOrBlack, String halfMove, Integer level, String comment) {
 		this.number = number;
 		this.white = whitheOrBlack;
@@ -48,35 +50,35 @@ public class PGNTree implements Comparable<PGNTree>{
 		this.level = level;
 		this.comment = comment;
 	}
-	
-	public static PGNTree createChildNode(PGNTree parent, Integer number, Boolean whitheOrBlack, String halfMove, Integer level,
-			String comment) {
-		
+
+	public static PGNTree createChildNode(PGNTree parent, Integer number, Boolean whitheOrBlack, String halfMove,
+			Integer level, String comment) {
 
 		PGNTree newNode = new PGNTree(number, whitheOrBlack, halfMove, level, comment);
 		newNode.setParent(parent);
-		
+
 		parent.children.add(newNode);
-		
-		newNode.setPath(parent.getPath() + (parent.children.size()-1));
+
+		newNode.setPath(parent.getPath() + (parent.children.size() - 1));
 
 		return newNode;
 
 	}
-	
 
 	public static PGNTree createRootNode() {
 		PGNTree newNode = new PGNTree(0, true, ".", 0, "I am root!");
+
+		newNode.setPath("0");
+
 		return newNode;
 	}
-	
+
 	public static PGNTree createOnlyChildRoot(PGNTree onlyChild) {
 		PGNTree newNode = new PGNTree(0, true, ".", 0, "I am root!");
 		newNode.children.add(onlyChild);
 		return newNode;
 	}
-	
-	
+
 	public Integer getParentNumber() {
 
 		if (this.parent != null) {
@@ -85,19 +87,17 @@ public class PGNTree implements Comparable<PGNTree>{
 			return 0;
 		}
 	}
-	
-	
+
 	public int getHalfMoveNumber() {
-		return ((this.number-1) * 2) + (this.isWhite() ? 0 : 1);
+		return ((this.number - 1) * 2) + (this.isWhite() ? 0 : 1);
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public Integer getColumn() {
-		return (this.level*2) + (this.isWhite() ? 0 : 1);
+		return (this.level * 2) + (this.isWhite() ? 0 : 1);
 	}
-
 
 	/**
 	 * Promote to first Item of list, continue with parent until root
@@ -113,27 +113,26 @@ public class PGNTree implements Comparable<PGNTree>{
 			promote(parent);
 		}
 	}
-	
-	public LinkedList<PGNTree> toFlatList (LinkedList<PGNTree> toFlat) {
-		
-		//parent fist
+
+	public LinkedList<PGNTree> toFlatList(LinkedList<PGNTree> toFlat) {
+
+		// parent fist
 		toFlat.addLast(this);
-		
+
 		// then the children
 		for (PGNTree tree : this.getChildren()) {
 			tree.toFlatList(toFlat);
 		}
 		return toFlat;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param root
 	 * @return
 	 */
 	public int maxWith(PGNTree root) {
-		
+
 		int currentWith = 0;
 		for (int i = 0; i < root.getChildren().size(); i++) {
 			PGNTree child = root.getChildren().get(i);
@@ -141,16 +140,16 @@ public class PGNTree implements Comparable<PGNTree>{
 		}
 		return currentWith;
 	}
-	
+
 	/**
 	 * 
 	 * @param root
 	 * @param dept
 	 * @return
 	 */
-	
+
 	public int maxDepth(PGNTree root) {
-		
+
 		if (root == null || root.getChildren().isEmpty()) {
 			return 0;
 		} else {
@@ -159,21 +158,22 @@ public class PGNTree implements Comparable<PGNTree>{
 				PGNTree child = root.getChildren().get(i);
 				currentDept = Math.max(currentDept, child.maxDepth(child));
 			}
-			return currentDept+1;
+			return currentDept + 1;
 		}
 	}
-	
-	public String fillMatrix(PGNTree root, TreeMap<Location, PGNTree> locations, int x, int y) {
 
-		String childTreeWorkedWhenEmpty = "-";
+	public String fillMatrix(TreeMap<Location, PGNTree> locations, int x, int y, PGNTree... children) {
 
-		for (int i = 0; i < root.getChildren().size(); i++) {
+		String allWorked = "";
 
-			PGNTree child = root.getChildren().get(i);
-			
+		for (PGNTree child : children) {
+
+			System.out.println(child.getPath());
+			int i = Integer.parseInt(child.getPath().substring(child.getPath().length() - 1, child.getPath().length()));
+
 			Location loc = new Location(x + i, y);
 
-			PGNTree existing = locations.get(loc); 
+			PGNTree existing = locations.get(loc);
 
 			if (existing == null) {
 				locations.put(loc, child);
@@ -197,41 +197,43 @@ public class PGNTree implements Comparable<PGNTree>{
 			}
 
 			// one level down
-			childTreeWorkedWhenEmpty = child.fillMatrix(child, locations, x + i, y + 1);
+			PGNTree[] array = child.getChildren().stream().toArray(PGNTree[]::new);
+			allWorked = child.fillMatrix(locations, x + i, y + 1, array);
 
-			if (!childTreeWorkedWhenEmpty.isEmpty()) {
-				if (child.getPath().equals(childTreeWorkedWhenEmpty)) {
-					System.out.println("root found " + childTreeWorkedWhenEmpty);
+			if (!allWorked.isEmpty()) {
+				if (child.getPath().equals(allWorked)) {
+					System.out.println("root found " + allWorked);
 					// thats the root to move
 					// top of failed variation reached, try again from here
 					locations.remove(loc);
 					System.out.println("removing from loc " + loc);
-					
+
 					int j = 0;
-					while (!childTreeWorkedWhenEmpty.isEmpty()) {
+					while (!allWorked.isEmpty()) {
 						j++;
 						// move x more until it works...
 						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
-						
-						childTreeWorkedWhenEmpty = child.fillMatrix(PGNTree.createOnlyChildRoot(child), locations, x + i + j, y);
+
+						allWorked = child.fillMatrix(locations, x + i + j, y, child);
 					}
 
-					return childTreeWorkedWhenEmpty;
-				} else if (child.getPath().startsWith(childTreeWorkedWhenEmpty)) {
-					System.out.println("comparing " + child.getPath() + " and " + childTreeWorkedWhenEmpty);
+					// this return would break the outer loop !
+//					return childTreeWorkedWhenEmpty;
+				} else if (child.getPath().startsWith(allWorked)) {
+					System.out.println("comparing " + child.getPath() + " and " + allWorked);
 					// is a variation, propagate for the whole sub variation..
 					locations.remove(loc);
 					System.out.println("removing from loc " + loc);
-					return childTreeWorkedWhenEmpty;
+
+					// here ok
+					return allWorked;
 				}
 			}
 
 		}
+		// must have worked at that point for all children
 		return "";
 	}
-	
-	
-	
 
 	public PGNTree getParent() {
 		return parent;
@@ -267,11 +269,9 @@ public class PGNTree implements Comparable<PGNTree>{
 
 	@Override
 	public String toString() {
-		return "PGNTree [number=" + number + ", white=" + white
-				+ ", halfMove=" + halfMove + ", level=" + level + ", attribute=" + attribute + ", comment=" + comment
-				+ ", lastOfLevel=" + lastOfLevel + "]";
+		return "PGNTree [number=" + number + ", white=" + white + ", halfMove=" + halfMove + ", level=" + level
+				+ ", attribute=" + attribute + ", comment=" + comment + ", lastOfLevel=" + lastOfLevel + "]";
 	}
-
 
 	/**
 	 * @return the number
@@ -280,14 +280,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return number;
 	}
 
-
 	/**
 	 * @param number the number to set
 	 */
 	public void setNumber(Integer number) {
 		this.number = number;
 	}
-
 
 	/**
 	 * @return the white
@@ -296,14 +294,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return white;
 	}
 
-
 	/**
 	 * @param white the white to set
 	 */
 	public void setWhite(Boolean white) {
 		this.white = white;
 	}
-
 
 	/**
 	 * @return the halfMove
@@ -312,14 +308,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return halfMove;
 	}
 
-
 	/**
 	 * @param halfMove the halfMove to set
 	 */
 	public void setHalfMove(String halfMove) {
 		this.halfMove = halfMove;
 	}
-
 
 	/**
 	 * @return the level
@@ -328,14 +322,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return level;
 	}
 
-
 	/**
 	 * @param level the level to set
 	 */
 	public void setLevel(Integer level) {
 		this.level = level;
 	}
-
 
 	/**
 	 * @return the attribute
@@ -344,14 +336,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return attribute;
 	}
 
-
 	/**
 	 * @param attribute the attribute to set
 	 */
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
 	}
-
 
 	/**
 	 * @return the comment
@@ -360,14 +350,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return this.comment.replace("{", " ").replace("}", " ");
 	}
 
-
 	/**
 	 * @param comment the comment to set
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
 
 	/**
 	 * @return the lastOfLevel
@@ -376,14 +364,12 @@ public class PGNTree implements Comparable<PGNTree>{
 		return lastOfLevel;
 	}
 
-
 	/**
 	 * @param lastOfLevel the lastOfLevel to set
 	 */
 	public void setLastOfLevel(Boolean lastOfLevel) {
 		this.lastOfLevel = lastOfLevel;
 	}
-
 
 	@Override
 	public int compareTo(PGNTree o) {
@@ -406,7 +392,7 @@ public class PGNTree implements Comparable<PGNTree>{
 
 		}
 	}
-	
+
 //	/**
 //	 * 
 //	 * @return
@@ -415,9 +401,9 @@ public class PGNTree implements Comparable<PGNTree>{
 //		return getNumber() + "." + getParentNumber() + "." + getColumn(); 
 //	}
 
-	
 	/**
-	 * Splits comments 
+	 * Splits comments
+	 * 
 	 * @param maxLenght
 	 * @return
 	 */
@@ -442,7 +428,7 @@ public class PGNTree implements Comparable<PGNTree>{
 		}
 		// last line
 		all.add(commentLine.toString());
-		
+
 		return all;
 	}
 
@@ -459,6 +445,5 @@ public class PGNTree implements Comparable<PGNTree>{
 	public void setPath(String path) {
 		this.path = path;
 	}
-
 
 }

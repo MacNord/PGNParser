@@ -116,8 +116,11 @@ public class PGNParserColumn {
 		System.out.println("maxDepth  " + y);
 		
 
+
+
 		TreeMap<Location, PGNTree> tree = new TreeMap<Location, PGNTree>();
-		root.fillMatrix(root, tree, 0, 0);
+		root.fillMatrix(tree, 0, 0, root);
+		
 //		for (Location loc : locations.keySet()) {
 //			System.out.println(loc.toString() + locations.get(loc).toString());
 //		}
@@ -129,6 +132,13 @@ public class PGNParserColumn {
 		//sort moves
 		Collections.sort(allPGNTrees);
 		System.out.println("sorted");
+		
+		for (PGNTree item :  allPGNTrees ) {
+			System.out.println(item.getPath() + " " + item.getHalfMove());
+		}
+		
+		
+		System.out.println(allPGNTrees);
 		
 //		ArrayList<ArrayList<PGNTree>> allStructured = createdStrucuted(allPGNTrees);
 
