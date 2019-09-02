@@ -110,6 +110,22 @@ public class PGNParserColumn {
 		PGNTree root = PGNTree.createRootNode();
 		createMoves(tokens, root, moveNumber, level, doubleEndBrackets);
 		
+		
+		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
+		//TODO: deviation at fist child ?
+		allPGNTrees = root.getChildren().getFirst().toFlatList(allPGNTrees);
+		System.out.println("size is  " + allPGNTrees.size() );
+		//sort moves
+		Collections.sort(allPGNTrees);
+		System.out.println("sorted");
+		
+		for (PGNTree item :  allPGNTrees ) {
+			System.out.println(item.getPath() + " " + item.getHalfMove());
+		}
+		
+		
+		
+		
 		int x = root.maxWith(root);
 		int y = root.maxDepth(root);
 		System.out.println("maxWith " + x);
@@ -125,20 +141,7 @@ public class PGNParserColumn {
 //			System.out.println(loc.toString() + locations.get(loc).toString());
 //		}
 		
-		LinkedList<PGNTree> allPGNTrees = new LinkedList<>();
-		//TODO: deviation at fist child ?
-		allPGNTrees = root.getChildren().getFirst().toFlatList(allPGNTrees);
-		System.out.println("size is  " + allPGNTrees.size() );
-		//sort moves
-		Collections.sort(allPGNTrees);
-		System.out.println("sorted");
-		
-		for (PGNTree item :  allPGNTrees ) {
-			System.out.println(item.getPath() + " " + item.getHalfMove());
-		}
-		
-		
-		System.out.println(allPGNTrees);
+
 		
 //		ArrayList<ArrayList<PGNTree>> allStructured = createdStrucuted(allPGNTrees);
 
@@ -231,12 +234,10 @@ public class PGNParserColumn {
 
 			} else {
 				// only increase move number if it is a move
-				System.out.println("old" + newNode);
 				newNode = PGNTree.createChildNode(root, moveNumber / 2, (moveNumber % 2 == 0 ? true : false), token, level, "");
 				//normally root becomes the new node to link at
 				root = newNode;
 				
-				System.out.println("new" + newNode);
 				moveNumber++;
 			}
 		}

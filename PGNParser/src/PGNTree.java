@@ -73,12 +73,6 @@ public class PGNTree implements Comparable<PGNTree> {
 		return newNode;
 	}
 
-	public static PGNTree createOnlyChildRoot(PGNTree onlyChild) {
-		PGNTree newNode = new PGNTree(0, true, ".", 0, "I am root!");
-		newNode.children.add(onlyChild);
-		return newNode;
-	}
-
 	public Integer getParentNumber() {
 
 		if (this.parent != null) {
@@ -165,11 +159,13 @@ public class PGNTree implements Comparable<PGNTree> {
 	public String fillMatrix(TreeMap<Location, PGNTree> locations, int x, int y, PGNTree... children) {
 
 		String allWorked = "";
+		
 
-		for (PGNTree child : children) {
+		for (int i = 0; i < children.length; i++) {
+			
+			PGNTree child = children[i];
 
-			System.out.println(child.getPath());
-			int i = Integer.parseInt(child.getPath().substring(child.getPath().length() - 1, child.getPath().length()));
+			System.out.println("dealing with " + child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath());
 
 			Location loc = new Location(x + i, y);
 
@@ -177,12 +173,12 @@ public class PGNTree implements Comparable<PGNTree> {
 
 			if (existing == null) {
 				locations.put(loc, child);
-				System.out.println("puting on loc " + loc + " " + child);
+				System.out.println("puting on loc " + child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath() + loc);
 			} else {
 				// not ok already existed
 				// must be for the whole tree until variation... also parts that where ok..
 
-				System.out.println("child.getPath() " + child.getPath());
+				System.out.println("could not put " + child.getPath() + "/" + child.getHalfMove());
 				StringBuilder reversedBuilder = new StringBuilder(child.getPath());
 				String reversed = reversedBuilder.reverse().toString();
 				// cut off 0
@@ -192,8 +188,23 @@ public class PGNTree implements Comparable<PGNTree> {
 				StringBuilder stemBuilder = new StringBuilder(reversed);
 				String stem = stemBuilder.reverse().toString();
 				System.out.println("stem " + stem);
-
-				return stem;
+				
+				
+				if (child.getPath().equals(stem)) {					
+					// Can't delete gate the job to any parent element since it is already the root of the variation
+					// remove not needed here
+					int j = 1;
+					while (!allWorked.isEmpty()) {
+						// move x more until it works...
+						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
+						allWorked = child.fillMatrix(locations, x + i + j, y, child);
+						j++;
+					}
+					
+					
+				} else {
+					return stem;
+				}
 			}
 
 			// one level down
@@ -203,20 +214,17 @@ public class PGNTree implements Comparable<PGNTree> {
 			if (!allWorked.isEmpty()) {
 				if (child.getPath().equals(allWorked)) {
 					System.out.println("root found " + allWorked);
-					// thats the root to move
-					// top of failed variation reached, try again from here
+					// thats the root to move, top of failed variation reached, try again from here
 					locations.remove(loc);
 					System.out.println("removing from loc " + loc);
 
-					int j = 0;
+					int j = 1;
 					while (!allWorked.isEmpty()) {
-						j++;
 						// move x more until it works...
 						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
-
 						allWorked = child.fillMatrix(locations, x + i + j, y, child);
+						j++;
 					}
-
 					// this return would break the outer loop !
 //					return childTreeWorkedWhenEmpty;
 				} else if (child.getPath().startsWith(allWorked)) {
@@ -224,8 +232,9 @@ public class PGNTree implements Comparable<PGNTree> {
 					// is a variation, propagate for the whole sub variation..
 					locations.remove(loc);
 					System.out.println("removing from loc " + loc);
+					System.out.println("returning befor putting " + child.getHalfMove() + "/" + child.getPath());
 
-					// here ok
+					// here needed to reach top of failed variation and shift it to the right
 					return allWorked;
 				}
 			}
