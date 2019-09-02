@@ -42,6 +42,8 @@ public class PGNTree implements Comparable<PGNTree> {
 	Boolean lastOfLevel = false;
 
 	Boolean begin = false;
+	
+	Location loc;
 
 	private PGNTree(Integer number, Boolean whitheOrBlack, String halfMove, Integer level, String comment) {
 		this.number = number;
@@ -156,92 +158,94 @@ public class PGNTree implements Comparable<PGNTree> {
 		}
 	}
 
-	public String fillMatrix(TreeMap<Location, PGNTree> locations, int x, int y, PGNTree... children) {
+	public boolean fillMatrix(TreeMap<Location, PGNTree> locations, int x, int y, PGNTree... children) {
 
-		String allWorked = "";
-		
+		int offset = 0;
 
 		for (int i = 0; i < children.length; i++) {
 			
+
 			PGNTree child = children[i];
+			boolean childWorked = false;
 
-			System.out.println("dealing with " + child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath());
+			System.out
+					.println("dealing with " + child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath());
 
-			Location loc = new Location(x + i, y);
+			Location loc = new Location(x + i + offset, y);
+			
 
 			PGNTree existing = locations.get(loc);
 
 			if (existing == null) {
+				child.setLoc(loc);
 				locations.put(loc, child);
-				System.out.println("puting on loc " + child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath() + loc);
+				System.out.println("puting on loc " + child.getNumber() + ". " + child.getHalfMove() + "/"
+						+ child.getPath() + loc);
 			} else {
-				// not ok already existed
-				// must be for the whole tree until variation... also parts that where ok..
 
-				System.out.println("could not put " + child.getPath() + "/" + child.getHalfMove());
-				StringBuilder reversedBuilder = new StringBuilder(child.getPath());
-				String reversed = reversedBuilder.reverse().toString();
-				// cut off 0
-				while (reversed.startsWith("0")) {
-					reversed = reversed.substring(1, reversed.length());
+				if ("5. Ng4/00000000002"
+						.equals(child.getNumber() + ". " + child.getHalfMove() + "/" + child.getPath())) {
+					System.out.println("why not?");
 				}
-				StringBuilder stemBuilder = new StringBuilder(reversed);
-				String stem = stemBuilder.reverse().toString();
-				System.out.println("stem " + stem);
 				
 				
-				if (child.getPath().equals(stem)) {					
-					// Can't delete gate the job to any parent element since it is already the root of the variation
-					// remove not needed here
-					int j = 1;
-					while (!allWorked.isEmpty()) {
-						// move x more until it works...
-						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
-						allWorked = child.fillMatrix(locations, x + i + j, y, child);
-						j++;
-					}
-					
-					
+				if (child.getParent() == null) {
+					System.out.println("no parent " + child.getHalfMove() + " " + child.getNumber());
+					System.exit(0);
+				}
+				
+				if (child.getParent().getLoc() == null) {
+					System.out.println("no lock " + child.getHalfMove() + " " + child.getNumber());
+					System.exit(0);
+				}
+				
+				if (child.getParent().getLoc().getX() == loc.getX()) {
+					return false;
 				} else {
-					return stem;
+					// root, make it work
+					
+					while (!childWorked) {
+						// move x more until it works...
+						offset++;
+						System.out.println("Trying with location x " + (x + i + offset) + " y " + y);
+						childWorked = child.fillMatrix(locations, x + i + offset, y, child);
+					}
+					// go on with next child
+					continue;
 				}
 			}
 
 			// one level down
 			PGNTree[] array = child.getChildren().stream().toArray(PGNTree[]::new);
-			allWorked = child.fillMatrix(locations, x + i, y + 1, array);
+			childWorked = child.fillMatrix(locations, x + i, y + 1, array);
 
-			if (!allWorked.isEmpty()) {
-				if (child.getPath().equals(allWorked)) {
-					System.out.println("root found " + allWorked);
-					// thats the root to move, top of failed variation reached, try again from here
-					locations.remove(loc);
-					System.out.println("removing from loc " + loc);
+			if (!childWorked) {
+				
+				child.setLoc(null);
+				locations.remove(loc);
+				
+				if (child.getParent() == null) {
+					System.out.println("hat no parent " + child.getHalfMove() + " " + child.getNumber());
+					System.exit(0);
+				}
 
-					int j = 1;
-					while (!allWorked.isEmpty()) {
+				if (child.getParent().getLoc().getX() == loc.getX()) {
+
+					return false;
+				} else {
+					// root, make it work
+					//j = 0;
+					while (!childWorked) {
 						// move x more until it works...
-						System.out.println("Trying with location x " + (x + i + j) + " y " + (y));
-						allWorked = child.fillMatrix(locations, x + i + j, y, child);
-						j++;
+						offset++;
+						System.out.println("Trying with location x " + (x + i + offset) + " y " + y);
+						childWorked = child.fillMatrix(locations, x + i + offset, y, child);
 					}
-					// this return would break the outer loop !
-//					return childTreeWorkedWhenEmpty;
-				} else if (child.getPath().startsWith(allWorked)) {
-					System.out.println("comparing " + child.getPath() + " and " + allWorked);
-					// is a variation, propagate for the whole sub variation..
-					locations.remove(loc);
-					System.out.println("removing from loc " + loc);
-					System.out.println("returning befor putting " + child.getHalfMove() + "/" + child.getPath());
-
-					// here needed to reach top of failed variation and shift it to the right
-					return allWorked;
 				}
 			}
-
 		}
 		// must have worked at that point for all children
-		return "";
+		return true;
 	}
 
 	public PGNTree getParent() {
@@ -453,6 +457,20 @@ public class PGNTree implements Comparable<PGNTree> {
 	 */
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	/**
+	 * @return the loc
+	 */
+	public Location getLoc() {
+		return loc;
+	}
+
+	/**
+	 * @param loc the loc to set
+	 */
+	public void setLoc(Location loc) {
+		this.loc = loc;
 	}
 
 }
